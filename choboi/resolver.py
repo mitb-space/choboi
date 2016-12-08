@@ -21,7 +21,7 @@ root_global_commands = {
 root_at_commands = {
     re.compile('^help$'): print_help,
     re.compile('.*fucka? you.*'): fucka_you,
-    re.compile('.*hey look.*'): oh_shit_waddaup
+    re.compile('.*hey look.*'): oh_shit_waddup
 }
 
 HELP_COMMAND = Command(action=print_help, args=[], kwargs={})
