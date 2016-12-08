@@ -27,6 +27,10 @@ def who_is_a_cuck(*args, **kwargs):
     )
 
 
+def say(*args, **kwargs):
+    return "fucka you whale. {}".format(args[0])
+
+
 def text_response(output):
     def inner(*args, **kwargs):
         return output
@@ -49,3 +53,4 @@ trebuchet = text_response("""
 With a trebuchet, you can lob a 90kg object about 300m away.
 That's 198.416 pounds 984.252 feet. WOW!
 """)
+racist = text_response("that's racist bro")
