@@ -13,7 +13,7 @@ Command = namedtuple('Command', ['args', 'kwargs', 'action'])
 # these should come from the bot
 root_global_commands = {
     re.compile('^take me.*'): take_me_to_da_movies,
-    re.compile('^herro$'): herro,
+    re.compile('.*her+o.*'): herro,
     re.compile('^is (?P<name>\w+) a cuck'): is_a_cuck,
     re.compile('^who.+a cuck'): who_is_a_cuck,
 }
