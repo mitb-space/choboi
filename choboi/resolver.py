@@ -15,11 +15,13 @@ root_global_commands = {
     re.compile('^who.+a cuck'): who_is_a_cuck,
     re.compile('^guys\S*$'): homies_assemble,
     re.compile('.*<!everyone>.*'): homies_assemble,
-    re.compile('.*dank meme.*'): dank_meme
+    re.compile('.*dank meme.*'): dank_meme,
+    re.compile('.*trebuchet.*'): trebuchet
 }
 root_at_commands = {
     re.compile('^help$'): print_help,
-    re.compile('.*fucka? you.*'): fucka_you
+    re.compile('.*fucka? you.*'): fucka_you,
+    re.compile('.*hey look.*'): oh_shit_waddaup
 }
 
 HELP_COMMAND = Command(action=print_help, args=[], kwargs={})
