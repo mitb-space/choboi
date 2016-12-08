@@ -39,5 +39,5 @@ take_me_to_da_movies = text_response(
     "i'll take you to da mooovies {}".format("https://youtu.be/GzaUddim4X4")
 )
 herro = text_response("parese")
-homies_assemble = text_response("assemble, my homies @everyone")
+homies_assemble = text_response("assemble, my homies")
 dank_meme = text_response("i am the dank meme king")
