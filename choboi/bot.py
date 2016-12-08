@@ -45,22 +45,19 @@ class Bot:
         output_list = slack_rtm_output
         if output_list and len(output_list) > 0:
             for output in output_list:
-                if output and 'text' in output and AT_BOT in output['text']:
+                if output and output.get('text'):
                     return (
-                        output['text'].split(AT_BOT)[1].strip().lower(),
+                        output['text'].strip().lower(),
                         output['channel']
                     )
         return None, None
 
     def _respond(self, output):
         # slack
-        if not output.command:
-            response = DEFAULT_RESPONSE
-        else:
-            response = output.command.action(
-                *output.command.args,
-                **output.command.kwargs
-            )
+        response = output.command.action(
+            *output.command.args,
+            **output.command.kwargs
+        )
         self.client.api_call(
             "chat.postMessage",
             channel=output.destination,
@@ -72,8 +69,9 @@ class Bot:
         # hard coded to slack for now
         text, channel = self.parse_output()
         if text and channel:
-            command = resolve(text)
-            return ClientOutput(command=command, destination=channel)
+            command = resolve(text, at=AT_BOT)
+            if command:
+                return ClientOutput(command=command, destination=channel)
 
     def _connect(self):
         # Hard code to slack for now

@@ -4,6 +4,10 @@ import random
 cucks = {}
 
 
+def default(*args, **kwargs):
+    return "Sorry, I don't understand"
+
+
 def print_help(*args, **kwargs):
     commands = """
     Here are phrases I understand:
@@ -29,4 +33,10 @@ def is_a_cuck(*args, **kwargs):
 def who_is_a_cuck(*args, **kwargs):
     return ", ".join(
         [name for name, is_a_cuck in cucks.items() if is_a_cuck == 'Yes']
+    )
+
+
+def take_me_to_da_movies(*args, **kwargs):
+    return "i'll take you to da mooovies {}".format(
+        "https://youtu.be/GzaUddim4X4"
     )
