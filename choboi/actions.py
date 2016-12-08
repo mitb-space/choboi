@@ -11,13 +11,6 @@ Here are phrases I understand:
     who is a cuck?
 """
 
-default = text_response("Sorry, I don't understand")
-print_help = text_response(HELP_TEXT)
-take_me_to_da_movies = text_response(
-    "i'll take you to da mooovies {}".format("https://youtu.be/GzaUddim4X4")
-)
-herro = text_response("parese")
-
 
 def is_a_cuck(*args, **kwargs):
     name = args[0].lower()
@@ -31,7 +24,15 @@ def who_is_a_cuck(*args, **kwargs):
         [name for name, is_a_cuck in cucks.items() if is_a_cuck == 'Yes']
     )
 
-def simple_text_command(output):
+def text_response(output):
     def inner(*args, **kwargs):
         return output
     return inner
+
+
+default = text_response("Sorry, I don't understand")
+print_help = text_response(HELP_TEXT)
+take_me_to_da_movies = text_response(
+    "i'll take you to da mooovies {}".format("https://youtu.be/GzaUddim4X4")
+)
+herro = text_response("parese")

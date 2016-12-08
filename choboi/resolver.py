@@ -10,6 +10,7 @@ from .actions import (
 
 Command = namedtuple('Command', ['args', 'kwargs', 'action'])
 
+# these should come from the bot
 root_global_commands = {
     re.compile('^take me.*'): take_me_to_da_movies,
     re.compile('^herro$'): herro,
@@ -44,14 +45,15 @@ def resolve(
         at_in_text = True
         text = text.split(at)[1].strip()
 
-    # Search global commands
-    output = _search(text, global_commands)
+    # Search  commands
+    for commands in (global_commands, at_commands,):
+        output = _search(text, commands)
+        if output:
+            break
 
-    # search @ commands
-    if at_in_text:
-        output = _search(text, at_commands)
-        if not output:
-            return DEFAULT_COMMAND
+    # no output and no @
+    if not output and at_in_text:
+        return DEFAULT_COMMAND
 
     return output
 
