@@ -14,11 +14,12 @@ root_global_commands = {
     re.compile('^is (?P<name>\w+) a cuck'): is_a_cuck,
     re.compile('^who.+a cuck'): who_is_a_cuck,
     re.compile('^guys\S*$'): homies_assemble,
-    re.compile('.*@everyone.*'): homies_assemble,
+    re.compile('.*<!everyone>.*'): homies_assemble,
     re.compile('.*dank meme.*'): dank_meme
 }
 root_at_commands = {
     re.compile('^help$'): print_help,
+    re.compile('.*fuck you.*'): fucka_you
 }
 
 HELP_COMMAND = Command(action=print_help, args=[], kwargs={})

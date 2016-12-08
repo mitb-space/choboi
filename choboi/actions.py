@@ -41,3 +41,4 @@ take_me_to_da_movies = text_response(
 herro = text_response("parese")
 homies_assemble = text_response("assemble, my homies")
 dank_meme = text_response("i am the dank meme king")
+fucka_you = text_response("fucka you buddy")

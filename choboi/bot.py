@@ -45,7 +45,8 @@ class Bot:
         output_list = slack_rtm_output
         if output_list and len(output_list) > 0:
             for output in output_list:
-                if output and output.get('text'):
+                if (output and output.get('text') and
+                        output.get('user') != BOT_ID):
                     return (
                         output['text'].strip().lower(),
                         output['channel']
