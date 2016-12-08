@@ -34,3 +34,4 @@ def who_is_a_cuck(*args, **kwargs):
 def simple_text_command(output):
     def inner(*args, **kwargs):
         return output
+    return inner
