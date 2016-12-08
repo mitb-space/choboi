@@ -2,10 +2,7 @@
 import re
 from collections import namedtuple
 
-from .actions import (
-    print_help, herro, is_a_cuck, who_is_a_cuck, take_me_to_da_movies,
-    default
-)
+from .actions import *  # noqa
 
 
 Command = namedtuple('Command', ['args', 'kwargs', 'action'])
@@ -16,6 +13,9 @@ root_global_commands = {
     re.compile('.*her+o.*'): herro,
     re.compile('^is (?P<name>\w+) a cuck'): is_a_cuck,
     re.compile('^who.+a cuck'): who_is_a_cuck,
+    re.compile('^guys\S*$'): homies_assemble,
+    re.compile('.*@everyone.*'): homies_assemble,
+    re.compile('.*dank meme.*'): dank_meme
 }
 root_at_commands = {
     re.compile('^help$'): print_help,
