@@ -3,24 +3,20 @@ import random
 
 cucks = {}
 
+HELP_TEXT = """
+Here are phrases I understand:
 
-def default(*args, **kwargs):
-    return "Sorry, I don't understand"
+    herro
+    is <name> a cuck?
+    who is a cuck?
+"""
 
-
-def print_help(*args, **kwargs):
-    commands = """
-    Here are phrases I understand:
-
-        herro
-        is <name> a cuck?
-        who is a cuck?
-    """
-    return commands
-
-
-def herro(*args, **kwargs):
-    return "parese"
+default = text_response("Sorry, I don't understand")
+print_help = text_response(HELP_TEXT)
+take_me_to_da_movies = text_response(
+    "i'll take you to da mooovies {}".format("https://youtu.be/GzaUddim4X4")
+)
+herro = text_response("parese")
 
 
 def is_a_cuck(*args, **kwargs):
@@ -35,8 +31,6 @@ def who_is_a_cuck(*args, **kwargs):
         [name for name, is_a_cuck in cucks.items() if is_a_cuck == 'Yes']
     )
 
-
-def take_me_to_da_movies(*args, **kwargs):
-    return "i'll take you to da mooovies {}".format(
-        "https://youtu.be/GzaUddim4X4"
-    )
+def simple_text_command(output):
+    def inner(*args, **kwargs):
+        return output
