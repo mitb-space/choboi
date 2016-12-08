@@ -19,7 +19,7 @@ root_global_commands = {
 }
 root_at_commands = {
     re.compile('^help$'): print_help,
-    re.compile('.*fuck you.*'): fucka_you
+    re.compile('.*fucka? you.*'): fucka_you
 }
 
 HELP_COMMAND = Command(action=print_help, args=[], kwargs={})
@@ -44,7 +44,7 @@ def resolve(
     at_in_text = False
     if at and at in text:
         at_in_text = True
-        text = text.split(at)[1].strip()
+        text = text.replace(at, '').strip()
 
     # Search  commands
     for commands in (global_commands, at_commands,):
