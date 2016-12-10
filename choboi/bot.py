@@ -2,6 +2,8 @@
 import os
 import logging
 import time
+import threading
+import queue
 from collections import namedtuple
 
 from slackclient import SlackClient
@@ -13,7 +15,8 @@ BOT_ID = os.environ.get('SLACK_BOT_ID', 'U3BMAJT2A')
 SLACK_TOKEN = os.environ.get('SLACK_CHOBOI_API_TOKEN')
 
 DEFAULT_RESPONSE = "Sorry, I don't understand"
-READ_WEBSOCKET_DELAY = 1
+READ_WEBSOCKET_DELAY = 0.1
+WRITE_DELAY = 0
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +27,13 @@ class SlackEvents:
 
 
 class Bot:
-
     at_bot = "<@{}>".format(BOT_ID)
-    resolved_commands = []
+    resolved_commands = queue.Queue()
+    threads = []
     default_channel = "#general"
+
+    num_writers = 2
+    num_listeners = 1
 
     def __init__(self):
         # just slack for now
@@ -40,43 +46,50 @@ class Bot:
         if not self.client.rtm_connect():
             raise Exception()
         logger.info("Bot connected")
-        while True:
-            self._listen()
-            self._respond()
-            time.sleep(READ_WEBSOCKET_DELAY)
+        try:
+            for i in range(self.num_listeners):
+                self.threads.append(threading.Thread(target=self._listen))
+            for i in range(self.num_writers):
+                self.threads.append(threading.Thread(target=self._respond))
+            for thread in self.threads:
+                thread.start()
+        except Exception as ex:
+            logging.error("Error occurred: {}".format(ex))
+        finally:
+            self.resolved_commands.join()
 
     def _listen(self):
         """
         Append slack output to the shared output queue
         """
-        output_list = self.client.rtm_read()
-        if output_list and len(output_list) == 0:
-            return output_list
+        while True:
+            try:
+                output_list = self.client.rtm_read()
+                if output_list and len(output_list) == 0:
+                    continue
 
-        commands = self.__process_output(output_list)
-        self.resolved_commands.extend(commands)
+                commands = self.__process_output(output_list)
+                for command in commands:
+                    self.resolved_commands.put_nowait(command)
+                time.sleep(READ_WEBSOCKET_DELAY)
+            except Exception as ex:
+                logging.error("_listen exception: {}".format(ex))
 
     def _respond(self):
         """
         TODO : RTM?
         """
-        # TODO one at a time
-        while self.resolved_commands:
-            output = self.resolved_commands.pop()
-            if isinstance(output, SlackEvents.Error):
-                self.__respond_with_error(output)
-            else:
-                response = output.command.action(
-                    *output.command.args,
-                    message=output
-                )
-                logging.info("Responding '{}'".format(response))
-                self.client.api_call(
-                    "chat.postMessage",
-                    channel=output.channel,
-                    text=response,
-                    as_user=True
-                )
+        while True:
+            try:
+                if self.resolved_commands.empty():
+                    continue
+                output = self.resolved_commands.get()
+                if isinstance(output, SlackEvents.Error):
+                    self.__respond_with_error(output)
+                else:
+                    self.__respond_with_message(output)
+            except Exception as ex:
+                logging.error("_respond exception: {}".format(ex))
 
     def __process_output(self, output_list):
         """
@@ -135,5 +148,21 @@ class Bot:
             "chat.postMessage",
             channel="#choboi-errors",
             text="{}".format(output),
+            as_user=True
+        )
+
+    def __respond_with_message(self, output):
+        """
+        Apply command action and reply with a message
+        """
+        response = output.command.action(
+            *output.command.args,
+            message=output
+        )
+        logging.info("Responding '{}'".format(response))
+        self.client.api_call(
+            "chat.postMessage",
+            channel=output.channel,
+            text=response,
             as_user=True
         )
