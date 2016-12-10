@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import logging
 import time
 from collections import namedtuple
 
@@ -8,16 +9,25 @@ from slackclient import SlackClient
 from .resolver import resolve
 
 
-BOT_ID = 'U3BMAJT2A'
-AT_BOT = "<@{}>".format(BOT_ID)
+BOT_ID = os.environ.get('SLACK_BOT_ID', 'U3BMAJT2A')
 SLACK_TOKEN = os.environ.get('SLACK_CHOBOI_API_TOKEN')
+
 DEFAULT_RESPONSE = "Sorry, I don't understand"
 READ_WEBSOCKET_DELAY = 1
 
-ClientOutput = namedtuple('ClientOutput', ['command', 'destination'])
+logger = logging.getLogger(__name__)
+
+
+class SlackEvents:
+    Message = namedtuple('Message', ['command', 'channel', 'user'])
+    Error = namedtuple('Error', ['error', 'code', 'msg'])
 
 
 class Bot:
+
+    at_bot = "<@{}>".format(BOT_ID)
+    resolved_commands = []
+    default_channel = "#general"
 
     def __init__(self):
         # just slack for now
@@ -27,53 +37,103 @@ class Bot:
         """
         Connect to bot client
         """
-        if not self._connect():
-            raise ConnectionError()
-        print("Connected!")
+        if not self.client.rtm_connect():
+            raise Exception()
+        logger.info("Bot connected")
         while True:
-            try:
-                output = self._listen()
-                if output:
-                    self._respond(output)
-                time.sleep(READ_WEBSOCKET_DELAY)
-            except Exception as ex:
-                print(ex)
-
-    def parse_output(self):
-        # hard coded to slack for now
-        slack_rtm_output = self.client.rtm_read()
-        output_list = slack_rtm_output
-        if output_list and len(output_list) > 0:
-            for output in output_list:
-                if (output and output.get('text') and
-                        output.get('user') != BOT_ID):
-                    return (
-                        output['text'].strip().lower(),
-                        output['channel']
-                    )
-        return None, None
-
-    def _respond(self, output):
-        # slack
-        response = output.command.action(
-            *output.command.args,
-            **output.command.kwargs
-        )
-        self.client.api_call(
-            "chat.postMessage",
-            channel=output.destination,
-            text=response,
-            as_user=True
-        )
+            self._listen()
+            self._respond()
+            time.sleep(READ_WEBSOCKET_DELAY)
 
     def _listen(self):
-        # hard coded to slack for now
-        text, channel = self.parse_output()
-        if text and channel:
-            command = resolve(text, at=AT_BOT)
-            if command:
-                return ClientOutput(command=command, destination=channel)
+        """
+        Append slack output to the shared output queue
+        """
+        output_list = self.client.rtm_read()
+        if output_list and len(output_list) == 0:
+            return output_list
 
-    def _connect(self):
-        # Hard code to slack for now
-        return self.client.rtm_connect()
+        commands = self.__process_output(output_list)
+        self.resolved_commands.extend(commands)
+
+    def _respond(self):
+        """
+        TODO : RTM?
+        """
+        # TODO one at a time
+        while self.resolved_commands:
+            output = self.resolved_commands.pop()
+            if isinstance(output, SlackEvents.Error):
+                self.__respond_with_error(output)
+            else:
+                response = output.command.action(
+                    *output.command.args,
+                    message=output
+                )
+                logging.info("Responding '{}'".format(response))
+                self.client.api_call(
+                    "chat.postMessage",
+                    channel=output.channel,
+                    text=response,
+                    as_user=True
+                )
+
+    def __process_output(self, output_list):
+        """
+        process output
+
+        TODO output list content should be one type
+        """
+        resolved = []
+        for output in output_list:
+            if not output:
+                continue
+
+            sanitized = None
+            if output.get('type') == 'error':
+                sanitized = self.__process_error(output)
+            elif output.get('type') == 'message':
+                sanitized = self.__process_message(output)
+            else:
+                logger.info("Processing unhandled: {}".format(output))
+
+            if sanitized:
+                resolved.append(sanitized)
+
+        return resolved
+
+    def __process_error(self, output):
+        """
+        Process error event
+        """
+        logger.error("Processing error: {}".format(output))
+        return SlackEvents.Error(
+            error=output.get('error'),
+            code=output.get('code'),
+            msg=output.get('msg')
+        )
+
+    def __process_message(self, output):
+        """
+        Process message event
+        """
+        logger.info("Processing message: {}".format(output))
+        text = output.get('text', '').strip().lower()
+        command = resolve(text, at=self.at_bot)
+        if command:
+            return SlackEvents.Message(
+                command=command,
+                channel=output.get('channel', self.default_channel),
+                user=output.get('user')
+            )
+
+    def __respond_with_error(self, output):
+        """
+        Respond with error
+        """
+        self.client.api_call(
+            "chat.postMessage",
+            channel="#choboi-errors",
+            text="{}".format(output),
+            as_user=True
+        )

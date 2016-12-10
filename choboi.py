@@ -13,6 +13,7 @@ Supported commands:
 
     help -> print commands
 """
+from choboi import config
 from choboi.bot import Bot
 
 

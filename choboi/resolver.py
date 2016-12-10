@@ -5,7 +5,7 @@ from collections import namedtuple
 from .actions import *  # noqa
 
 
-Command = namedtuple('Command', ['args', 'kwargs', 'action'])
+Command = namedtuple('Command', ['args', 'action'])
 
 # these should come from the bot
 root_global_commands = {
@@ -26,8 +26,8 @@ root_at_commands = {
     re.compile('say (.+)'): say
 }
 
-HELP_COMMAND = Command(action=print_help, args=[], kwargs={})
-DEFAULT_COMMAND = Command(action=default, args=[], kwargs={})
+HELP_COMMAND = Command(action=print_help, args=[])
+DEFAULT_COMMAND = Command(action=default, args=[])
 
 
 def resolve(
@@ -67,7 +67,5 @@ def _search(text, commands):
     for pattern, action in commands.items():
         match = pattern.match(text)
         if match:
-            # TODO get group name
             args = match.groups() or []
-            kwargs = {}
-            return Command(action=action, args=args, kwargs=kwargs)
+            return Command(action=action, args=args)
