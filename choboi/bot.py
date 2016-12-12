@@ -15,8 +15,8 @@ BOT_ID = os.environ.get('SLACK_BOT_ID', 'U3BMAJT2A')
 SLACK_TOKEN = os.environ.get('SLACK_CHOBOI_API_TOKEN')
 
 DEFAULT_RESPONSE = "Sorry, I don't understand"
-READ_WEBSOCKET_DELAY = 0.1
-WRITE_DELAY = 0
+READ_WEBSOCKET_DELAY = 0.2
+WRITE_DELAY = 0.1
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,6 @@ class Bot:
     num_listeners = 1
 
     def __init__(self):
-        # just slack for now
         self.client = SlackClient(SLACK_TOKEN)
 
     def connect(self):
@@ -90,6 +89,7 @@ class Bot:
                     self.__respond_with_message(output)
             except Exception as ex:
                 logging.error("_respond exception: {}".format(ex))
+            time.sleep(WRITE_DELAY)
 
     def __process_output(self, output_list):
         """
@@ -106,7 +106,8 @@ class Bot:
             if output.get('type') == 'error':
                 sanitized = self.__process_error(output)
             elif output.get('type') == 'message':
-                sanitized = self.__process_message(output)
+                if output.get('user') != BOT_ID:
+                    sanitized = self.__process_message(output)
             else:
                 logger.info("Processing unhandled: {}".format(output))
 
