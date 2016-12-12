@@ -14,8 +14,8 @@ from .resolver import resolve
 BOT_ID = os.environ.get('SLACK_BOT_ID', 'U3BMAJT2A')
 SLACK_TOKEN = os.environ.get('SLACK_CHOBOI_API_TOKEN')
 
-READ_WEBSOCKET_DELAY = 0.5
-WRITE_DELAY = 0.5
+READ_WEBSOCKET_DELAY = 0.1
+WRITE_DELAY = 0.2
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +27,7 @@ class SlackEvents:
 
 class Bot:
     default_channel = "#general"
-
-    num_writers = 1
+    num_writers = 2
     num_listeners = 1
 
     def __init__(self):
