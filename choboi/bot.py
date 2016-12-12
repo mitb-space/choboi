@@ -26,16 +26,16 @@ class SlackEvents:
 
 
 class Bot:
-    at_bot = "<@{}>".format(BOT_ID)
-    resolved_commands = queue.LifoQueue()
-    threads = []
     default_channel = "#general"
 
     num_writers = 1
     num_listeners = 1
 
     def __init__(self):
+        self.at_bot = "<@{}>".format(BOT_ID)
         self.client = SlackClient(SLACK_TOKEN)
+        self.resolved_commands = queue.LifoQueue()
+        self.threads = []
 
     def connect(self):
         """
@@ -61,6 +61,7 @@ class Bot:
         Append slack output to the shared output queue
         """
         while True:
+            time.sleep(READ_WEBSOCKET_DELAY)
             try:
                 output_list = self.client.rtm_read()
                 if output_list and len(output_list) == 0:
@@ -69,7 +70,6 @@ class Bot:
                 commands = self.__process_output(output_list)
                 for command in commands:
                     self.resolved_commands.put_nowait(command)
-                time.sleep(READ_WEBSOCKET_DELAY)
             except Exception as ex:
                 logging.error("_listen exception: {}".format(ex))
 
@@ -78,6 +78,7 @@ class Bot:
         TODO : RTM?
         """
         while True:
+            time.sleep(WRITE_DELAY)
             try:
                 if self.resolved_commands.empty():
                     continue
@@ -88,7 +89,6 @@ class Bot:
                     self.__respond_with_message(output)
             except Exception as ex:
                 logging.error("_respond exception: {}".format(ex))
-            time.sleep(WRITE_DELAY)
 
     def __process_output(self, output_list):
         """

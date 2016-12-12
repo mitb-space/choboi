@@ -33,7 +33,7 @@ def resolve(
     text,
     global_commands=root_global_commands,
     at_commands=root_at_commands,
-    at=''
+    at=None
 ):
     """
     Given a text input from user and a dictionary containing of command: action,
@@ -49,8 +49,13 @@ def resolve(
         at_in_text = True
         text = text.replace(at, '').strip()
 
+    # We only care about at_commands if at_in_text is true
+    search_commands = [global_commands,]
+    if at_in_text:
+        search_commands.append(at_commands)
+
     # Search  commands
-    for commands in (global_commands, at_commands,):
+    for commands in search_commands:
         output = _search(text, commands)
         if output:
             break
