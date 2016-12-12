@@ -16,7 +16,7 @@ SLACK_TOKEN = os.environ.get('SLACK_CHOBOI_API_TOKEN')
 
 DEFAULT_RESPONSE = "Sorry, I don't understand"
 READ_WEBSOCKET_DELAY = 0.2
-WRITE_DELAY = 0.1
+WRITE_DELAY = 0.2
 
 logger = logging.getLogger(__name__)
 
