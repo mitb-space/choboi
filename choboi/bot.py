@@ -32,7 +32,7 @@ class Bot:
     threads = []
     default_channel = "#general"
 
-    num_writers = 2
+    num_writers = 1
     num_listeners = 1
 
     def __init__(self):
