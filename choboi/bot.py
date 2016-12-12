@@ -15,7 +15,7 @@ BOT_ID = os.environ.get('SLACK_BOT_ID', 'U3BMAJT2A')
 SLACK_TOKEN = os.environ.get('SLACK_CHOBOI_API_TOKEN')
 
 READ_WEBSOCKET_DELAY = 0.1
-WRITE_DELAY = 0.2
+WRITE_DELAY = 0.1
 
 logger = logging.getLogger(__name__)
 
