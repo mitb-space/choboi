@@ -14,9 +14,8 @@ from .resolver import resolve
 BOT_ID = os.environ.get('SLACK_BOT_ID', 'U3BMAJT2A')
 SLACK_TOKEN = os.environ.get('SLACK_CHOBOI_API_TOKEN')
 
-DEFAULT_RESPONSE = "Sorry, I don't understand"
-READ_WEBSOCKET_DELAY = 0.4
-WRITE_DELAY = 0.3
+READ_WEBSOCKET_DELAY = 0.5
+WRITE_DELAY = 0.5
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +27,7 @@ class SlackEvents:
 
 class Bot:
     at_bot = "<@{}>".format(BOT_ID)
-    resolved_commands = queue.Queue()
+    resolved_commands = queue.LifoQueue()
     threads = []
     default_channel = "#general"
 
@@ -133,13 +132,14 @@ class Bot:
         """
         logger.info("Processing message: {}".format(output))
         text = output.get('text', '').strip().lower()
-        command = resolve(text, at=self.at_bot)
-        if command:
-            return SlackEvents.Message(
-                command=command,
-                channel=output.get('channel', self.default_channel),
-                user=output.get('user')
-            )
+        if text:
+            command = resolve(text, at=self.at_bot)
+            if command:
+                return SlackEvents.Message(
+                    command=command,
+                    channel=output.get('channel', self.default_channel),
+                    user=output.get('user')
+                )
 
     def __respond_with_error(self, output):
         """

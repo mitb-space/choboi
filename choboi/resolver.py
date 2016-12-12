@@ -26,7 +26,6 @@ root_at_commands = {
     re.compile('say (.+)'): say
 }
 
-HELP_COMMAND = Command(action=print_help, args=[])
 DEFAULT_COMMAND = Command(action=default, args=[])
 
 
@@ -40,9 +39,9 @@ def resolve(
     Given a text input from user and a dictionary containing of command: action,
     returns a Command object for the bot to perform.
     """
-    # Empty string, so print the help command
+    # Empty string, just return
     if not text:
-        return HELP_COMMAND
+        return
 
     at = at.lower()
     at_in_text = False
@@ -56,7 +55,7 @@ def resolve(
         if output:
             break
 
-    # no output and no @
+    # no output and @
     if not output and at_in_text:
         return DEFAULT_COMMAND
 
