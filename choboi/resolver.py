@@ -1,40 +1,40 @@
 # -*- coding: utf-8 -*-
 import re
+import logging
 from collections import namedtuple
 
-from .actions import *  # noqa
-
+logger = logging.getLogger(__name__)
 
 Command = namedtuple('Command', ['args', 'action'])
 
-# these should come from the bot
-root_global_commands = {
-    re.compile('^take me.*'): take_me_to_da_movies,
-    re.compile('.*her+o.*'): herro,
-    re.compile('^is (?P<name>\w+) a cuck'): is_a_cuck,
-    re.compile('^who.+a cuck'): who_is_a_cuck,
-    re.compile('^guys\S*$'): homies_assemble,
-    re.compile('.*<!everyone>.*'): homies_assemble,
-    re.compile('.*dank meme.*'): dank_meme,
-    re.compile('.*trebuchet.*'): trebuchet,
-    re.compile('^k{3,}'): racist
-}
-root_at_commands = {
-    re.compile('^help$'): print_help,
-    re.compile('.*fucka? you.*'): fucka_you,
-    re.compile('.*hey look.*'): oh_shit_waddup,
-    re.compile('say (.+)'): say
-}
+global_commands = {}
+mention_commands = {}
+
+
+def text_response(pattern, output, mention=False):
+    def inner(*args, **kwargs):
+        return output
+    return register_command(pattern, mention)(inner)
+
+
+def register_command(pattern, mention=False):
+    logger.info("registering: {}".format(pattern))
+    def wrapper(func):
+        if mention:
+            mention_commands[re.compile(pattern)] = func
+        else:
+            global_commands[re.compile(pattern)] = func
+        return func
+    return wrapper
+
+
+# TODO: default response should come from the bot
+default = text_response("supboi", "gtfo bro, i didn't hear a word")
 
 DEFAULT_COMMAND = Command(action=default, args=[])
 
 
-def resolve(
-    text,
-    global_commands=root_global_commands,
-    at_commands=root_at_commands,
-    at=None
-):
+def resolve(text, at=None):
     """
     Given a text input from user and a dictionary containing of command: action,
     returns a Command object for the bot to perform.
@@ -52,7 +52,7 @@ def resolve(
     # We only care about at_commands if at_in_text is true
     search_commands = [global_commands,]
     if at_in_text:
-        search_commands.append(at_commands)
+        search_commands.append(mention_commands)
 
     # Search  commands
     for commands in search_commands:

@@ -8,19 +8,14 @@ from collections import namedtuple
 
 from slackclient import SlackClient
 
+from . import config
+from . import actions
 from .resolver import resolve
-
-
-BOT_ID = os.environ.get('SLACK_BOT_ID', 'U3BMAJT2A')
-SLACK_TOKEN = os.environ.get('SLACK_CHOBOI_API_TOKEN')
-
-READ_WEBSOCKET_DELAY = 0.1
-WRITE_DELAY = 0.1
 
 logger = logging.getLogger(__name__)
 
 
-class SlackEvents:
+class SlackEvent:
     Message = namedtuple('Message', ['command', 'channel', 'user'])
     Error = namedtuple('Error', ['error', 'code', 'msg'])
 
@@ -31,17 +26,23 @@ class Bot:
     num_listeners = 1
 
     def __init__(self):
-        self.at_bot = "<@{}>".format(BOT_ID)
-        self.client = SlackClient(SLACK_TOKEN)
+        self.id = config.BOT_ID
+        self.client = SlackClient(config.SLACK_TOKEN)
         self.resolved_commands = queue.LifoQueue()
         self.threads = []
+        self.write_delay = config.WRITE_DELAY
+        self.read_delay = config.READ_WEBSOCKET_DELAY
+
+    @property
+    def at_bot(self):
+        return "<@{}>".format(self.id)
 
     def connect(self):
         """
         Connect to bot client
         """
         if not self.client.rtm_connect():
-            raise Exception()
+            raise Exception("Unable to connect to slack RTM service")
         logger.info("Bot connected")
         try:
             for i in range(self.num_listeners):
@@ -51,8 +52,11 @@ class Bot:
             for thread in self.threads:
                 thread.start()
         except Exception as ex:
+            # Log error and attempt another connection
             logging.error("Error occurred: {}".format(ex))
-        finally:
+            self.resolved_commands.join()
+            self.connect()
+        else:
             self.resolved_commands.join()
 
     def _listen(self):
@@ -60,66 +64,55 @@ class Bot:
         Append slack output to the shared output queue
         """
         while True:
-            time.sleep(READ_WEBSOCKET_DELAY)
+            time.sleep(self.read_delay)
             try:
-                output_list = self.client.rtm_read()
-                if output_list and len(output_list) == 0:
+                input_list = self.client.rtm_read()
+                if input_list and len(input_list) == 0:
                     continue
 
-                commands = self.__process_output(output_list)
+                commands = self.__process_input(input_list)
                 for command in commands:
                     self.resolved_commands.put_nowait(command)
             except Exception as ex:
                 logging.error("_listen exception: {}".format(ex))
 
-    def _respond(self):
+    def __process_input(self, input_list):
         """
-        TODO : RTM?
-        """
-        while True:
-            time.sleep(WRITE_DELAY)
-            try:
-                if self.resolved_commands.empty():
-                    continue
-                output = self.resolved_commands.get()
-                if isinstance(output, SlackEvents.Error):
-                    self.__respond_with_error(output)
-                else:
-                    self.__respond_with_message(output)
-            except Exception as ex:
-                logging.error("_respond exception: {}".format(ex))
-
-    def __process_output(self, output_list):
-        """
-        process output
-
-        TODO output list content should be one type
+        process input from slack
         """
         resolved = []
-        for output in output_list:
-            if not output:
+        for slack_input in input_list:
+            # If the input is empty, just skip the rest
+            if not slack_input:
                 continue
 
-            sanitized = None
-            if output.get('type') == 'error':
-                sanitized = self.__process_error(output)
-            elif output.get('type') == 'message':
-                if output.get('user') != BOT_ID:
-                    sanitized = self.__process_message(output)
-            else:
-                logger.info("Processing unhandled: {}".format(output))
-
+            # sanitize the input to a format we understand
+            sanitized = self.__sanitize_input(slack_input)
             if sanitized:
                 resolved.append(sanitized)
 
         return resolved
+
+    def __sanitize_input(self, slack_input):
+        """
+        Sanitizes raw marshaled slack_input JSON into one of SlackEvent.Error or SlackEvent.Message
+        """
+        sanitized = None
+        if slack_input.get('type') == 'error':
+            sanitized = self.__process_error(slack_input)
+        elif slack_input.get('type') == 'message':
+            if slack_input.get('user') != self.id:
+                sanitized = self.__process_message(slack_input)
+        else:
+            logger.info("Processing unhandled: {}".format(slack_input))
+        return sanitized
 
     def __process_error(self, output):
         """
         Process error event
         """
         logger.error("Processing error: {}".format(output))
-        return SlackEvents.Error(
+        return SlackEvent.Error(
             error=output.get('error'),
             code=output.get('code'),
             msg=output.get('msg')
@@ -127,18 +120,38 @@ class Bot:
 
     def __process_message(self, output):
         """
-        Process message event
+        Process message event.  If the output message resolves to a registered command,
+        it will return a SlackEvent.Message object which contains the command to perform,
+        channel to output the command result, and information about the user who made such
+        request.
         """
         logger.info("Processing message: {}".format(output))
         text = output.get('text', '').strip().lower()
         if text:
             command = resolve(text, at=self.at_bot)
             if command:
-                return SlackEvents.Message(
+                return SlackEvent.Message(
                     command=command,
                     channel=output.get('channel', self.default_channel),
                     user=output.get('user')
                 )
+
+    def _respond(self):
+        """
+        Outputs response to slack
+        """
+        while True:
+            time.sleep(self.write_delay)
+            try:
+                if self.resolved_commands.empty():
+                    continue
+                output = self.resolved_commands.get()
+                if isinstance(output, SlackEvent.Error):
+                    self.__respond_with_error(output)
+                else:
+                    self.__respond_with_message(output)
+            except Exception as ex:
+                logging.error("_respond exception: {}".format(ex))
 
     def __respond_with_error(self, output):
         """

@@ -3,6 +3,11 @@ from logging.config import dictConfig
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 
+BOT_ID = os.environ.get('SLACK_BOT_ID', 'U3BMAJT2A')
+SLACK_TOKEN = os.environ.get('SLACK_CHOBOI_API_TOKEN')
+
+READ_WEBSOCKET_DELAY = 0.1
+WRITE_DELAY = 0.1
 
 LOGGING = {
     'version': 1,
