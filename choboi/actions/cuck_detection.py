@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import random
+from ..remote.giphy import get_random_gif_by_tag
 from ..resolver import register_command
 
 cucks = {}
@@ -13,6 +14,14 @@ def is_a_cuck(*args, **kwargs):
     name = args[0].lower()
     if name not in cucks:
         cucks[name] = YES if random.randint(0, 1) else NO
+    if cucks[name] == YES:
+        gif_json = get_random_gif_by_tag('yes').json()
+        gif_url = gif_json['data']['bitly_url']
+        return cucks[name] + ' ' + gif_url
+    elif cucks[name] == NO:
+        gif_json = get_random_gif_by_tag('no').json()
+        gif_url = gif_json['data']['bitly_url']
+        return cucks[name] + ' ' + gif_url
     return cucks[name]
 
 
