@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import random
 from ..remote.itsthisforthat import get_random_app_idea
 from ..resolver import register_command
 
