@@ -159,7 +159,7 @@ class Bot:
         """
         self.client.api_call(
             "chat.postMessage",
-            channel="#choboi-errors",
+            channel="#choboi-logs",
             text="{}".format(output),
             as_user=True
         )
