@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import random
 from ..remote.brewerydb import get_beer_by_abv
 from ..resolver import register_command
 

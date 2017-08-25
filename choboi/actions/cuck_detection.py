@@ -16,11 +16,11 @@ def is_a_cuck(*args, **kwargs):
         cucks[name] = YES if random.randint(0, 1) else NO
     if cucks[name] == YES:
         gif_json = get_random_gif_by_tag('yes').json()
-        gif_url = gif_json['data']['bitly_url']
+        gif_url = gif_json['data']['image_url']
         return cucks[name] + ' ' + gif_url
     elif cucks[name] == NO:
         gif_json = get_random_gif_by_tag('no').json()
-        gif_url = gif_json['data']['bitly_url']
+        gif_url = gif_json['data']['image_url']
         return cucks[name] + ' ' + gif_url
     return cucks[name]
 
