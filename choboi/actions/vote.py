@@ -25,6 +25,17 @@ def vote_up(*args, **kwargs):
         votes[uid]["votes"] += 1
     return "<@{}> gained a point yo".format(votes[uid]["name"])
 
+@register_command('\<\@(?P<uid>.+)\>\-\-')
+def vote_down(*args, **kwargs):
+    print("sdown")
+    uid = args[0].lower()
+    if uid not in votes:
+        name = get_username(uid)
+        votes[uid] = {"name": name, "votes": -1}
+    else:
+        votes[uid]["votes"] -= 1
+    return "<@{}> lost a point yo".format(votes[uid]["name"])
+
 
 @register_command('^print votes', mention=True)
 def print_votes(*args, **kwargs):
