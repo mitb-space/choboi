@@ -6,6 +6,7 @@ import threading
 import queue
 from collections import namedtuple
 
+import websocket
 from slackclient import SlackClient
 
 from . import config
@@ -44,6 +45,7 @@ class Bot:
         if not self.client.rtm_connect():
             raise Exception("Unable to connect to slack RTM service")
         logger.info("Bot connected")
+        self.__respond_with_error("Bot connected")
         try:
             for i in range(self.num_listeners):
                 self.threads.append(threading.Thread(target=self._listen))
@@ -75,6 +77,11 @@ class Bot:
                     self.resolved_commands.put_nowait(command)
             except Exception as ex:
                 logging.error("_listen exception: {}".format(ex))
+            except websocket.WebSocketConnectionClosedException as ex:
+                logging.error("_listen connection error: {}".format(ex))
+                self.__respond_with_error("connection died, attempting to reconnect")
+                # let connect() reconnect
+                raise
 
     def __process_input(self, input_list):
         """

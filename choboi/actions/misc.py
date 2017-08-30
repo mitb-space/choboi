@@ -2,6 +2,7 @@
 """
 random stuff
 """
+import random
 from ..resolver import register_command
 
 

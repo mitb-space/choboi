@@ -27,7 +27,6 @@ def vote_up(*args, **kwargs):
 
 @register_command('\<\@(?P<uid>.+)\>\-\-')
 def vote_down(*args, **kwargs):
-    print("sdown")
     uid = args[0].lower()
     if uid not in votes:
         name = get_username(uid)
