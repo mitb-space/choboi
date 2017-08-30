@@ -13,4 +13,4 @@ def say(*args, **kwargs):
 
 @register_command('^soo*$')
 def sososo(*args, **kwargs):
-    return "so" * random.randin(3, 16)
+    return "so" * random.randint(3, 16)
