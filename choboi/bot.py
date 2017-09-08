@@ -77,7 +77,7 @@ class Bot:
                     self.resolved_commands.put_nowait(command)
             except Exception as ex:
                 logging.error("_listen exception: {}".format(ex))
-            except websocket.WebSocketConnectionClosedException as ex:
+            except websocket.WebSocketException as ex:
                 logging.error("_listen connection error: {}".format(ex))
                 self.__respond_with_error("connection died, attempting to reconnect")
                 # let connect() reconnect
