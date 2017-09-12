@@ -38,7 +38,8 @@ def vote_down(*args, **kwargs):
 
 @register_command('^print votes', mention=True)
 def print_votes(*args, **kwargs):
-    return "\n".join(["{}: {}".format(v["name"], v["votes"]) for _, v in votes.items()])
+    sortedVotes = sorted(votes.items(), key=lambda x:x[1]["votes"], reverse=True)
+    return "\n".join(["{}: {}".format(v["name"], v["votes"]) for _, v in sortedVotes])
 
 
 def get_username(user_id):
