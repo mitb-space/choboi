@@ -54,3 +54,8 @@ hes_a_nice_guy = text_response(
     "he\'?s a nice guy.*",
     "he's a nice guy... BUT"
 )
+
+dank = text_response(
+    "[dD]ank",
+    "k."
+)
