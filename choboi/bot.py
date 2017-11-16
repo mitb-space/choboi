@@ -75,13 +75,13 @@ class Bot:
                 commands = self.__process_input(input_list)
                 for command in commands:
                     self.resolved_commands.put_nowait(command)
-            except Exception as ex:
-                logging.error("_listen exception: {}".format(ex))
             except websocket.WebSocketException as ex:
                 logging.error("_listen connection error: {}".format(ex))
                 self.__respond_with_error("connection died, attempting to reconnect")
                 # let connect() reconnect
                 raise
+            except Exception as ex:
+                logging.error("_listen exception: {}".format(ex))
 
     def __process_input(self, input_list):
         """
