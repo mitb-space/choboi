@@ -25,6 +25,7 @@ class Bot:
     default_channel = "#general"
     num_writers = 2
     num_listeners = 1
+    keep_alive = True
 
     def __init__(self):
         self.id = config.BOT_ID
@@ -42,46 +43,45 @@ class Bot:
         """
         Connect to bot client
         """
-        if not self.client.rtm_connect():
-            raise Exception("Unable to connect to slack RTM service")
-        logger.info("Bot connected")
-        self.__respond_with_error("Bot connected")
-        try:
-            for i in range(self.num_listeners):
-                self.threads.append(threading.Thread(target=self._listen))
-            for i in range(self.num_writers):
-                self.threads.append(threading.Thread(target=self._respond))
-            for thread in self.threads:
-                thread.start()
-        except Exception as ex:
-            # Log error and attempt another connection
-            logging.error("Error occurred: {}".format(ex))
-            self.resolved_commands.join()
-            self.connect()
-        else:
-            self.resolved_commands.join()
+        while True:
+            keep_alive = True
+            if not self.client.rtm_connect():
+                raise Exception("Unable to connect to slack RTM service")
+            logger.info("Bot connected")
+            self.__respond_with_error("Bot connected")
+            try:
+                for i in range(self.num_listeners):
+                    self.threads.append(threading.Thread(target=self._listen))
+                for i in range(self.num_writers):
+                    self.threads.append(threading.Thread(target=self._respond))
+                for thread in self.threads:
+                    thread.start()
+            except Exception as ex:
+                logging.error("Error occurred: {}".format(ex))
+                self.resolved_commands.join()
+            else:
+                self.resolved_commands.join()
 
     def _listen(self):
         """
         Append slack output to the shared output queue
         """
-        while True:
+        while keep_alive:
             time.sleep(self.read_delay)
             try:
                 input_list = self.client.rtm_read()
                 if input_list and len(input_list) == 0:
                     continue
-
                 commands = self.__process_input(input_list)
                 for command in commands:
                     self.resolved_commands.put_nowait(command)
             except websocket.WebSocketException as ex:
                 logging.error("_listen connection error: {}".format(ex))
                 self.__respond_with_error("connection died, attempting to reconnect")
-                # let connect() reconnect
-                raise
+                keep_alive = False
             except Exception as ex:
                 logging.error("_listen exception: {}".format(ex))
+                keep_alive = False
 
     def __process_input(self, input_list):
         """
@@ -147,7 +147,7 @@ class Bot:
         """
         Outputs response to slack
         """
-        while True:
+        while keep_alive:
             time.sleep(self.write_delay)
             try:
                 if self.resolved_commands.empty():
