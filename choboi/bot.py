@@ -35,6 +35,11 @@ class Bot:
         self.write_delay = config.WRITE_DELAY
         self.read_delay = config.READ_WEBSOCKET_DELAY
 
+    def __refresh(self):
+        self.client = SlackClient(config.SLACK_TOKEN)
+        self.resolved_commands = queue.LifoQueue()
+        self.threads = []
+
     @property
     def at_bot(self):
         return "<@{}>".format(self.id)
@@ -43,8 +48,9 @@ class Bot:
         """
         Connect to bot client
         """
-        while True:
-            keep_alive = True
+        done = False
+        while not done:
+            self.keep_alive = True
             if not self.client.rtm_connect():
                 raise Exception("Unable to connect to slack RTM service")
             logger.info("Bot connected")
@@ -58,15 +64,23 @@ class Bot:
                     thread.start()
             except Exception as ex:
                 logging.error("Error occurred: {}".format(ex))
-                self.resolved_commands.join()
-            else:
-                self.resolved_commands.join()
+                self.keep_alive = False
+
+            for t in self.threads:
+                try:
+                    if t.is_alive():
+                        t.join()
+                except (KeyboardInterrupt, SystemExit):
+                    logging.info('Received keyboard interrupt, quitting threads')
+                    self.keep_alive = False
+                    done = True
+            self.__refresh()
 
     def _listen(self):
         """
         Append slack output to the shared output queue
         """
-        while keep_alive:
+        while self.keep_alive:
             time.sleep(self.read_delay)
             try:
                 input_list = self.client.rtm_read()
@@ -78,10 +92,10 @@ class Bot:
             except websocket.WebSocketException as ex:
                 logging.error("_listen connection error: {}".format(ex))
                 self.__respond_with_error("connection died, attempting to reconnect")
-                keep_alive = False
+                self.keep_alive = False
             except Exception as ex:
                 logging.error("_listen exception: {}".format(ex))
-                keep_alive = False
+                self.keep_alive = False
 
     def __process_input(self, input_list):
         """
@@ -147,7 +161,7 @@ class Bot:
         """
         Outputs response to slack
         """
-        while keep_alive:
+        while self.keep_alive:
             time.sleep(self.write_delay)
             try:
                 if self.resolved_commands.empty():
