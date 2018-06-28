@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 votes = {}
 
 
-@register_command('\<\@(?P<uid>.+)\>\+\+')
+@register_command('\<\@(?P<uid>.+)\>\s*\+\+')
 def vote_up(*args, **kwargs):
     print("sup")
     uid = args[0].lower()
@@ -25,7 +25,7 @@ def vote_up(*args, **kwargs):
         votes[uid]["votes"] += 1
     return "<@{}> gained a point yo".format(votes[uid]["name"])
 
-@register_command('\<\@(?P<uid>.+)\>\-\-')
+@register_command('\<\@(?P<uid>.+)\>\s*\-\-')
 def vote_down(*args, **kwargs):
     uid = args[0].lower()
     if uid not in votes:
