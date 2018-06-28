@@ -13,7 +13,7 @@ def new_chapter():
     last_chapter = chapters[-1].chapter
     for p in posts:
         data = p['data']
-        if data['link_flair_text'] == 'Updated':
+        if data['link_flair_text'] == 'Current Chapter':
             title = data['title']
             nums = [int(s) for s in title.split() if s.isdigit()]
             if len(nums) > 0:
