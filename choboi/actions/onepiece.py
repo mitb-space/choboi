@@ -10,7 +10,10 @@ chapters = []
 @register_event(name='one-piece-chapter', frequency=600, channel='#anime')
 def new_chapter():
     posts = get_posts()
-    last_chapter = chapters[-1].chapter
+    if len(chapters) == 0:
+        last_chapter = 0
+    else:
+        last_chapter = chapters[-1].chapter
     for p in posts:
         data = p['data']
         if data['link_flair_text'] == 'Current Chapter':
