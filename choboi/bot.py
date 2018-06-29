@@ -82,9 +82,14 @@ class Bot:
         Schedule events and output event result to the output queue
         """
         for e in events:
-            schedule.every(e.frequency).seconds.do(
-                self.__process_event(e)
-            )
+            if e.at:
+                schedule.every().day.at(e.at).do(
+                    self.__process_event(e)
+                )
+            else:
+                schedule.every(e.frequency).seconds.do(
+                    self.__process_event(e)
+                )
         while self.keep_alive:
             time.sleep(self.event_delay)
             schedule.run_pending()

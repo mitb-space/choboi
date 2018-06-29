@@ -7,3 +7,4 @@ from .misc import *
 from .text_commands import *
 from .vote import *
 from .onepiece import *
+from .haiku import *
