@@ -66,7 +66,6 @@ class Bot:
                     thread.start()
             except Exception as ex:
                 logging.error("Error occurred: {}".format(ex))
-                self.keep_alive = False
 
             for t in self.threads:
                 try:
