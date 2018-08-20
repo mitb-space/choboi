@@ -9,6 +9,7 @@ Command = namedtuple('Command', ['args', 'action'])
 
 global_commands = {}
 mention_commands = {}
+_default_command = None
 
 
 def text_response(pattern, output, mention=False):
@@ -28,10 +29,15 @@ def register_command(pattern, mention=False):
     return wrapper
 
 
-# TODO: default response should come from the bot
-default = text_response("supboi", "gtfo bro, i didn't hear a word")
-
-DEFAULT_COMMAND = Command(action=default, args=[])
+def default_command():
+    logger.info("registering default command")
+    if _default_command is not None:
+        logger.error("over writing current default command")
+    def wrapper(func):
+        global _default_command
+        _default_command = func
+        return func
+    return wrapper
 
 
 def resolve(text, at=None):
@@ -62,7 +68,8 @@ def resolve(text, at=None):
 
     # no output and @
     if not output and at_in_text:
-        return DEFAULT_COMMAND
+        logger.info(_default_command)
+        return Command(action=_default_command, args=[])
 
     return output
 
