@@ -98,7 +98,10 @@ class Bot:
         process an event
         """
         def __process():
-            self.__respond_with_event(event)
+            try:
+                self.__respond_with_event(event)
+            except Exception:
+                logger.error(f'failed to process event {event}')
         return __process
 
     def _listen(self):
