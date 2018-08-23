@@ -12,6 +12,12 @@ mention_commands = {}
 _default_command = None
 
 
+def static_response(output):
+    def inner(*args, **kwargs):
+        return output
+    return inner
+
+
 def text_response(pattern, output, mention=False):
     def inner(*args, **kwargs):
         return output
@@ -40,7 +46,7 @@ def default_command():
     return wrapper
 
 
-def resolve(text, at=None):
+def resolve(text, at=None, handle_default=True):
     """
     Given a text input from user and a dictionary containing of command: action,
     returns a Command object for the bot to perform.
@@ -68,8 +74,11 @@ def resolve(text, at=None):
 
     # no output and @
     if not output and at_in_text:
-        logger.info(_default_command)
-        return Command(action=_default_command, args=[])
+        if handle_default:
+            logger.info(_default_command)
+            return Command(action=_default_command, args=[])
+        else:
+            return
 
     return output
 

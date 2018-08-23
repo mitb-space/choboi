@@ -6,14 +6,17 @@ import threading
 import queue
 from collections import namedtuple
 
+import markovify
 import schedule
 import websocket
 from slackclient import SlackClient
 
-from . import config
 from . import actions
-from .resolver import resolve
+from . import config
+from . import storage
+from .messages import get_message_text
 from .event import events
+from .resolver import resolve, Command, static_response
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +41,8 @@ class Bot:
         self.write_delay = config.WRITE_DELAY
         self.read_delay = config.READ_WEBSOCKET_DELAY
         self.event_delay = 1
+        self.model = None
+        self.messages = []
 
     @property
     def at_bot(self):
@@ -47,6 +52,10 @@ class Bot:
         """
         Connect to bot client
         """
+        if config.MARKOV_ENABLED:
+            logger.info("training models")
+            self._init_models()
+
         if not self.client.rtm_connect(auto_reconnect=True):
             raise Exception("Unable to connect to slack RTM service")
         logger.info("Bot connected")
@@ -75,6 +84,18 @@ class Bot:
                     logging.info('Received keyboard interrupt, quitting threads')
                     self.keep_alive = False
                     done = True
+
+    def _init_models(self):
+        # TODO config
+        self.storage = storage.JSONStorage('data.json')
+        message_objs = self.storage.get_messages()
+        messages = get_message_text(message_objs)
+        self._train_models(messages)
+
+    def _train_models(self, messages):
+        if self.model is None:
+            self.model = markovify.Text(" ".join(messages), state_size=2)
+        # TODO handle re-training
 
     def _schedule_events(self):
         """
@@ -171,11 +192,19 @@ class Bot:
         """
         logger.info("Processing message: {}".format(slack_input))
         text = slack_input.get('text', '').strip().lower()
+        handle_default = not config.MARKOV_ENABLED
         if text:
-            command = resolve(text, at=self.at_bot)
+            command= resolve(text, at=self.at_bot, handle_default=handle_default)
             if command:
                 return SlackEvent.Message(
                     command=command,
+                    channel=slack_input.get('channel', self.default_channel),
+                    user=slack_input.get('user')
+                )
+            elif self.at_bot and not handle_default:
+                message = self.model.make_sentence()
+                return SlackEvent.Message(
+                    command=Command(action=static_response(message), args=[]),
                     channel=slack_input.get('channel', self.default_channel),
                     user=slack_input.get('user')
                 )
