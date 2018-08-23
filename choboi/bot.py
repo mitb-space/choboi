@@ -202,7 +202,7 @@ class Bot:
                     user=slack_input.get('user')
                 )
             elif self.at_bot and not handle_default:
-                message = self.model.make_sentence()
+                message = self.model.make_short_sentence(100)
                 return SlackEvent.Message(
                     command=Command(action=static_response(message), args=[]),
                     channel=slack_input.get('channel', self.default_channel),
