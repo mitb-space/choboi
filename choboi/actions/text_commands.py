@@ -59,3 +59,13 @@ dank = text_response(
     "[dD]ank",
     "k."
 )
+
+numbies = text_response(
+    ".*numbies",
+    "you gonna crunch them numbies?"
+)
+
+math_checks_out = text_response(
+    ".+\%",
+    "math checks out"
+)
