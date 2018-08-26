@@ -31,6 +31,7 @@ class Bot:
     num_writers = 2
     num_listeners = 1
     num_event_watchers = 1
+    num_markov_trainers = 1 if config.MARKOV_ENABLED else 0
     keep_alive = True
 
     def __init__(self):
@@ -42,7 +43,7 @@ class Bot:
         self.read_delay = config.READ_WEBSOCKET_DELAY
         self.event_delay = 1
         self.model = None
-        self.messages = []
+        self.messages = queue.LifoQueue()
 
     @property
     def at_bot(self):
@@ -69,6 +70,8 @@ class Bot:
                     self.threads.append(threading.Thread(target=self._listen))
                 for i in range(self.num_writers):
                     self.threads.append(threading.Thread(target=self._respond))
+                for i in range(self.num_markov_trainers):
+                    self.threads.append(threading.Thread(target=self._train))
                 for i in range(self.num_event_watchers):
                     self.threads.append(threading.Thread(target=self._schedule_events))
                 for thread in self.threads:
@@ -90,12 +93,38 @@ class Bot:
         self.storage = storage.JSONStorage('data.json')
         message_objs = self.storage.get_messages()
         messages = get_message_text(message_objs)
-        self._train_models(messages)
+        self.model = markovify.Text(". ".join(messages), state_size=4)
 
-    def _train_models(self, messages):
-        if self.model is None:
-            self.model = markovify.Text(" ".join(messages), state_size=2)
-        # TODO handle re-training
+    def _train(self):
+        """
+        periodically train markov model
+        """
+        schedule.every(config.MARKOV_TRAIN_FREQUENCY).seconds.do(self.__train)
+
+    def __train(self):
+        try:
+            logger.info("begin training models")
+            message_objs = []
+            size = self.messages.qsize()
+            if not size:
+                logger.info("no new messages to train with")
+                return
+
+            ii = 0
+            while ii < size or not self.messages.empty():
+                message_objs.append(self.messages.get())
+                ii += 1
+            messages = get_message_text(message_objs)
+            logger.info(f"collected {ii} messages")
+
+            model = markovify.Text(". ".join(messages), state_size=4)
+            self.model = markovify.combine([model, self.model])
+            logger.info(f"trained {ii} new messages")
+
+            self.storage.save_messages(message_objs)
+            logger.info(f"saving {ii} new messages")
+        except Exception:
+            logger.exception('something failed while training choboi')
 
     def _schedule_events(self):
         """
@@ -193,6 +222,13 @@ class Bot:
         logger.info("Processing message: {}".format(slack_input))
         text = slack_input.get('text', '').strip().lower()
         handle_default = not config.MARKOV_ENABLED
+
+        if config.MARKOV_ENABLED:
+            try:
+                self.messages.put_nowait(slack_input)
+            except Exception:
+                logger.exception("failed to put message in the message queue")
+
         if text:
             command= resolve(text, at=self.at_bot, handle_default=handle_default)
             if command:
@@ -202,7 +238,7 @@ class Bot:
                     user=slack_input.get('user')
                 )
             elif self.at_bot.lower() in text and not handle_default:
-                message = self.model.make_short_sentence(100)
+                message = self.model.make_short_sentence(100, tries=50)
                 return SlackEvent.Message(
                     command=Command(action=static_response(message), args=[]),
                     channel=slack_input.get('channel', self.default_channel),
