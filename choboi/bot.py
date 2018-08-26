@@ -60,7 +60,7 @@ class Bot:
         if not self.client.rtm_connect(auto_reconnect=True):
             raise Exception("Unable to connect to slack RTM service")
         logger.info("Bot connected")
-        self.__respond_with_error("Bot connected")
+        self._respond_to_debug_slack("Bot connected")
 
         done = False
         while not done:
@@ -123,6 +123,8 @@ class Bot:
 
             self.storage.save_messages(message_objs)
             logger.info(f"saving {ii} new messages")
+
+            self._respond_to_debug_slack(f"trained and saved {ii} new messges")
         except Exception:
             logger.exception('something failed while training choboi')
 
@@ -256,13 +258,13 @@ class Bot:
                     continue
                 output = self.responses.get()
                 if isinstance(output, SlackEvent.Error):
-                    self.__respond_with_error(output)
+                    self._respond_to_debug_slack(output)
                 else:
                     self.__respond_with_command(output)
             except Exception as ex:
                 logging.error("_respond exception: {}".format(ex))
 
-    def __respond_with_error(self, output):
+    def _respond_to_debug_slack(self, output):
         """
         Respond with error
         """
