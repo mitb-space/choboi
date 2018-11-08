@@ -14,9 +14,7 @@ from .. import storage
 
 logger = logging.getLogger(__name__)
 
-file_path = os.path.realpath(__file__)
-data_file = os.path.dirname(file_path)+ "/../../data/votes.json"
-storage = storage.JSONStorage(data_file)
+storage = storage.JSONStorage("votes.json")
 
 
 @register_command('\<\@(?P<uid>.+)\>\s*\+\+')
