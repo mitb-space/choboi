@@ -15,15 +15,15 @@ logger = logging.getLogger(__name__)
 # hard coding current points since there are no storage :(
 votes = {
     'u9yhuck2b': {
-        "name": "acferrel2",
+        "name": "supadooka",
         "votes": 20,
     },
     'u6fcp87hr': {
-        "name": "recursiveowl",
+        "name": "eric",
         "votes": 54,
     },
     'u39m0htja': {
-        "name": "pogopunkxiii",
+        "name": "jesse",
         "votes": 49,
     },
     'u389xuht2': {
@@ -39,7 +39,7 @@ votes = {
         "votes": 300,
     },
     'u38uw3edr': {
-        "name": "who_dat",
+        "name": "who_dad",
         "votes": 4,
     },
     'u7rq3bce5': {
