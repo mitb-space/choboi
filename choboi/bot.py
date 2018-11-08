@@ -282,14 +282,14 @@ class Bot:
         """
         response = output.command.action(
             *output.command.args,
-            message=output
+            message=output,
+            user=output.user,
         )
         logging.info("Responding '{}'".format(response))
         self.client.api_call(
             "chat.postMessage",
             channel=output.channel,
             text=response,
-            user=output.user,
             as_user=True
         )
 
