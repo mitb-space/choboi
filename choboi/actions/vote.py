@@ -52,8 +52,8 @@ votes = {
 @register_command('\<\@(?P<uid>.+)\>\s*\+\+')
 def vote_up(*args, **kwargs):
     uid = args[0].lower()
-    if uid == kwargs.get('user') or uid == "B3GKNLXL7":
-        if uid in votes:
+    if uid == kwargs.get('user') or uid == "b3gknlxl7":
+        if uid in votes and uid != "u3942s8pn":
             votes[uid]["votes"] = 0
         return "you can't game the system bro"
     if uid not in votes:
@@ -62,7 +62,6 @@ def vote_up(*args, **kwargs):
     else:
         votes[uid]["votes"] += 1
     votes['U3942S8PN']["votes"] += 1  # shhh
-    print(votes)
     return "<@{}> gained a point yo".format(votes[uid]["name"])
 
 
