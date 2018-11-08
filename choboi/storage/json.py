@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 class JSONStorage:
     def __init__(self, data_file):
         self.data_file = data_file
-        self._messages = []
+        self._data = {}
         self.__load(data_file)
 
     def __load(self, directory):
@@ -16,12 +16,21 @@ class JSONStorage:
         loads messages into memory from slack exported data
         """
         with open(self.data_file, 'r') as f:
-            self._messages = json.loads(f.read())
+            self._data = json.loads(f.read())
+
+    def get(self):
+        return self._data
+
+    def save(self, data):
+        self._data = data
+        with open(self.data_file, 'w') as f:
+            f.write(json.dumps(self._data))
 
     def get_messages(self):
-        return self._messages
+        # todo remove
+        return self._data
 
     def save_messages(self, messages):
-        self._messages += messages
-        with open(self.data_file, 'w') as f:
-            f.write(json.dumps(self._messages))
+        self._data += messages
+        self.save(self._data)
+
