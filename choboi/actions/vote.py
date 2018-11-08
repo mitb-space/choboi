@@ -52,9 +52,8 @@ votes = {
 @register_command('\<\@(?P<uid>.+)\>\s*\+\+')
 def vote_up(*args, **kwargs):
     uid = args[0].lower()
-    print(kwargs.get('user'))
-    print(kwargs)
-    if uid == kwargs.get('user', '').lower() or uid == "b3gknlxl7":
+    user = kwargs.get('user', '').lower()
+    if uid == user or user == "b3gknlxl7":
         if uid in votes and uid != "u3942s8pn":
             votes[uid]["votes"] = 0
         return "you can't game the system bro"
