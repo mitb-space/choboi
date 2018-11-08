@@ -58,6 +58,7 @@ class Bot:
             self._init_models()
 
         if not self.client.rtm_connect(auto_reconnect=True):
+            logger.exception("unable to connect to slack RTM service")
             raise Exception("Unable to connect to slack RTM service")
         logger.info("Bot connected")
         self._respond_to_debug_slack("Bot connected")
@@ -288,6 +289,7 @@ class Bot:
             "chat.postMessage",
             channel=output.channel,
             text=response,
+            user=output.user,
             as_user=True
         )
 
