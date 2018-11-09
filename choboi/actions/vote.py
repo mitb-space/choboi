@@ -36,7 +36,7 @@ def vote_up(*args, **kwargs):
     votes[uid] = {
         'votes': points,
         'name': name,
-        'display_name': display_name,
+        'display_name': display_name or name,
     }
     votes['u3942s8pn']["votes"] += 1  # shhh
     storage.save(votes)
