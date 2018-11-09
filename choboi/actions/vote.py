@@ -40,7 +40,7 @@ def vote_up(*args, **kwargs):
     }
     votes['u3942s8pn']["votes"] += 1  # shhh
     storage.save(votes)
-    return "<@{}> gained a point yo".format(votes[uid]["name"])
+    return "<@{}> one bluecoin for you homie".format(votes[uid]["name"])
 
 
 @register_command('\<\@(?P<uid>.+)\>\s*\-\-')
@@ -52,10 +52,10 @@ def vote_down(*args, **kwargs):
     else:
         votes[uid]["votes"] -= 1
     storage.save(votes)
-    return "<@{}> lost a point yo".format(votes[uid]["name"])
+    return "<@{}> lost a bluecoin yo".format(votes[uid]["name"])
 
 
-@register_command('^print votes', mention=True)
+@register_command('^print bluecoin', mention=False)
 def print_votes(*args, **kwargs):
     votes = storage.get()
     sortedVotes = sorted(votes.items(), key=lambda x:x[1]["votes"], reverse=True)
