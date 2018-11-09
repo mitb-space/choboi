@@ -18,7 +18,9 @@ class JSONStorage:
         with open(self.data_file, 'r') as f:
             self._data = json.loads(f.read())
 
-    def get(self):
+    def get(self, cached=False):
+        if not cached:
+            self.__load(self.data_file)
         return self._data
 
     def save(self, data):
