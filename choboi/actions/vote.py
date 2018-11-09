@@ -24,7 +24,7 @@ def vote_up(*args, **kwargs):
     user = kwargs.get('user', '').lower()
     target = get_user(uid)
     name = target.get('name')
-    display_name = target.get('display_name')
+    display_name = target['profile']['display_name']
 
     if uid == user or user == "b3gknlxl7":
         if uid in votes and uid != "u3942s8pn":
@@ -36,7 +36,7 @@ def vote_up(*args, **kwargs):
     votes[uid] = {
         'votes': points,
         'name': name,
-        'display_name': display_name or name,
+        'display_name': display_name
     }
     votes['u3942s8pn']["votes"] += 1  # shhh
     storage.save(votes)
