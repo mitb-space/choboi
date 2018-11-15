@@ -32,13 +32,13 @@ def vote_up(*args, **kwargs):
         storage.save(votes)
         return "you can't game the system bro"
 
-    points = votes.get(uid, {}).get('votes') or 1
+    points = votes.get(uid, {}).get('votes') or 0
+    points += 1
     votes[uid] = {
         'votes': points,
         'name': name,
         'display_name': display_name
     }
-    votes['u3942s8pn']["votes"] += 1  # shhh
     storage.save(votes)
     return "<@{}> one bluecoin for you homie".format(votes[uid]["name"])
 
