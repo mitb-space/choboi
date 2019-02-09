@@ -80,6 +80,6 @@ math_checks_out = text_response(
 )
 
 be_nice = text_response(
-    "(╯°□°）╯︵ ┻━┻",
+    "\(╯°□°）╯︵ ┻━┻",
     "┬─┬ ノ( ゜-゜ノ)"
 )
