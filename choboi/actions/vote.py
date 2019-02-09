@@ -105,14 +105,14 @@ def print_votes(*args, **kwargs):
     return "\n".join(["{}: {}".format(v["display_name"], v["votes"]) for _, v in sortedVotes])
 
 
-@register_command('whos being generous', mention=False)
+@register_command("who'?s being generous", mention=False)
 def print_givers(*args, **kwargs):
     votes_given = giver_storage.get();
     sorted_giver_votes = sorted(votes_given.items(), key=lambda x:x[1]["votes_given"], reverse=True)
     return "\n".join(["{}: {}".format(v["display_name"], v["votes_given"]) for _, v in sorted_giver_votes])
 
 
-@register_command('whos being mean', mention=False)
+@register_command("who'?s being mean", mention=False)
 def print_takers(*args, **kwargs):
     votes_taken = taker_storage.get();
     sorted_taker_votes = sorted(votes_taken.items(), key=lambda x:x[1]["votes_taken"], reverse=True)
