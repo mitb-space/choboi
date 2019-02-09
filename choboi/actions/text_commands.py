@@ -19,6 +19,15 @@ homies_assemble = text_response(
     'assemble, my homies'
 )
 
+up_arrow = text_response(
+    '^',
+    '^'
+)
+
+this_response = text_response(
+    '.*<!:this:>.*',
+    ':this:'
+)
 
 dank_meme = text_response(
     '.*dank meme.*',
