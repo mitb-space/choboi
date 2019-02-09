@@ -25,7 +25,7 @@ up_arrow = text_response(
 )
 
 this_response = text_response(
-    '.*<!:this:>.*',
+    '.*:this:.*',
     ':this:'
 )
 

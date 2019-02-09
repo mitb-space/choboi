@@ -74,7 +74,7 @@ def vote_down(*args, **kwargs):
     else:
         votes[uid]["votes"] -= 1
     vote_storage.save(votes)
-
+    get_taker(kwargs.get('user', '').lower())
     return "<@{}> lost a bluecoin yo".format(votes[uid]["name"])
 
 
