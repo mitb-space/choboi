@@ -20,7 +20,7 @@ homies_assemble = text_response(
 )
 
 up_arrow = text_response(
-    '^',
+    '\^',
     '^'
 )
 
