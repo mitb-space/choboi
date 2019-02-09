@@ -89,7 +89,7 @@ def save_taker(name, display_name, uid):
     votes_taken = taker_storage.get();
 
     points_taken = votes_taken.get(uid, {}).get('votes_taken') or 0
-    points_taken += 1
+    points_taken -= 1
     votes_taken[uid] = {
         'votes_taken': points_taken,
         'name': name,
