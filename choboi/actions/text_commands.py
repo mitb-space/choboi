@@ -78,3 +78,8 @@ math_checks_out = text_response(
     ".+\%",
     "math checks out"
 )
+
+be_nice = text_response(
+    "(╯°□°）╯︵ ┻━┻",
+    "┬─┬ ノ( ゜-゜ノ)"
+)
