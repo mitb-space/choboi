@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -15,8 +16,11 @@ class JSONStorage:
         """
         loads messages into memory from slack exported data
         """
-        with open(self.data_file, 'r') as f:
-            self._data = json.loads(f.read())
+        if os.path.exists(self.data_file):
+            with open(self.data_file, 'r') as f:
+                self._data = json.loads(f.read())
+        else:
+            self._data = {}
 
     def get(self, cached=False):
         if not cached:
