@@ -115,7 +115,7 @@ def print_givers(*args, **kwargs):
 @register_command("who'?s being mean", mention=False)
 def print_takers(*args, **kwargs):
     votes_taken = taker_storage.get();
-    sorted_taker_votes = sorted(votes_taken.items(), key=lambda x:x[1]["votes_taken"], reverse=True)
+    sorted_taker_votes = sorted(votes_taken.items(), key=lambda x:x[1]["votes_taken"], reverse=False)
     return "\n".join(["{}: {}".format(v["display_name"], v["votes_taken"]) for _, v in sorted_taker_votes])
 
 
