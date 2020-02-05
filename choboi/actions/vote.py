@@ -18,6 +18,11 @@ vote_storage = storage.JSONStorage("votes.json")
 giver_storage = storage.JSONStorage("givers.json")
 taker_storage = storage.JSONStorage("takers.json")
 
+banned = [
+    'b3gknlxl7',
+    'uslackbot',
+]
+
 @register_command('\<\@(?P<uid>.+)\>\s*\+\+')
 def vote_up(*args, **kwargs):
     votes = vote_storage.get()
@@ -27,9 +32,9 @@ def vote_up(*args, **kwargs):
     name = target.get('name')
     display_name = target['profile']['display_name']
 
-    if uid == user or user == "b3gknlxl7":
+    if uid == user or user in banned:
         if uid in votes and uid != "u3942s8pn":
-            votes[uid]["votes"] = 0
+            votes[uid]["votes"] -= 1
         vote_storage.save(votes)
         return "you can't game the system bro"
 
