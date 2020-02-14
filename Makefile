@@ -9,6 +9,9 @@ bootstrap:
 lint:
 	pylint --rcfile=.pylintrc ./choboi
 
+test:
+	pytest
+
 run:
 	$(PYTHON) choboi.py
 
