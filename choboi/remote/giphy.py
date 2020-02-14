@@ -9,10 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 def get_random_gif_by_tag(tag):
-    logger.info("fetching gif by tag {}".format(tag))
+    logger.info("fetching gif by tag %s", tag)
     endpoint = 'random'
     address = API_ROOT.format(endpoint=endpoint)
     params = {'api_key': API_KEY, 'tag': tag, 'rating': 'g'}
     response = requests.get(address, params=params)
-    logger.info("fetched image with {} status code".format(response.status_code))
+    logger.info("fetched image with %s status code", response.status_code)
     return response

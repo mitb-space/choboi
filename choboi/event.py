@@ -13,7 +13,7 @@ def register_event(name, frequency=60, at=None, channel=None):
     """
     registers a reoccuring event
     """
-    logger.info(f'registering event: {name}')
+    logger.info('registering event: %s', name)
     def wrapper(func):
         events.append(Event(name, at, frequency, channel, func))
         return func

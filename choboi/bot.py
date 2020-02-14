@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
 import logging
 import time
 import threading
@@ -8,15 +7,15 @@ from collections import namedtuple
 
 import markovify
 import schedule
-import websocket
 from slackclient import SlackClient
 
-from . import actions
 from . import config
 from . import storage
 from .messages import get_message_text
 from .event import events
 from .resolver import resolve, Command, static_response
+
+from . import actions # pylint: disable=unused-import
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +43,7 @@ class Bot:
         self.event_delay = 1
         self.model = None
         self.messages = queue.LifoQueue()
+        self.storage = None
 
     @property
     def at_bot(self):
@@ -67,18 +67,18 @@ class Bot:
         while not done:
             self.keep_alive = True
             try:
-                for i in range(self.num_listeners):
+                for _ in range(self.num_listeners):
                     self.threads.append(threading.Thread(target=self._listen))
-                for i in range(self.num_writers):
+                for _ in range(self.num_writers):
                     self.threads.append(threading.Thread(target=self._respond))
-                for i in range(self.num_markov_trainers):
+                for _ in range(self.num_markov_trainers):
                     self.threads.append(threading.Thread(target=self._train))
-                for i in range(self.num_event_watchers):
+                for _ in range(self.num_event_watchers):
                     self.threads.append(threading.Thread(target=self._schedule_events))
                 for thread in self.threads:
                     thread.start()
             except Exception as ex:
-                logging.error("Error occurred: {}".format(ex))
+                logging.error("Error occurred: %s", ex)
 
             for t in self.threads:
                 try:
@@ -116,15 +116,14 @@ class Bot:
                 message_objs.append(self.messages.get())
                 ii += 1
             messages = get_message_text(message_objs)
-            logger.info(f"collected {ii} messages")
+            logger.info("collected %d messages", ii)
 
             model = markovify.Text(". ".join(messages), state_size=4)
             self.model = markovify.combine([model, self.model])
-            logger.info(f"trained {ii} new messages")
+            logger.info("trained %d new messages", ii)
 
             self.storage.save_messages(message_objs)
-            logger.info(f"saving {ii} new messages")
-
+            logger.info("saving %d new messages", ii)
         except Exception:
             logger.exception('something failed while training choboi')
 
@@ -153,7 +152,7 @@ class Bot:
             try:
                 self.__respond_with_event(event)
             except Exception:
-                logger.error(f'failed to process event {event}')
+                logger.error('failed to process event %s', event)
         return __process
 
     def _listen(self):
@@ -164,13 +163,13 @@ class Bot:
             time.sleep(self.read_delay)
             try:
                 input_list = self.client.rtm_read()
-                if input_list and len(input_list) == 0:
+                if input_list and not input_list:
                     continue
                 commands = self.__process_input(input_list)
                 for command in commands:
                     self.responses.put_nowait(command)
             except Exception as ex:
-                logging.error("_listen exception: {}".format(ex))
+                logging.error("_listen exception: %s", ex)
 
     def __process_input(self, input_list):
         """
@@ -200,14 +199,14 @@ class Bot:
             if slack_input.get('user') != self.id:
                 sanitized = self.__process_message(slack_input)
         else:
-            logger.info("Processing unhandled: {}".format(slack_input))
+            logger.info("Processing unhandled: %s", slack_input)
         return sanitized
 
     def __process_error(self, slack_input):
         """
         Process error event
         """
-        logger.error("Processing error: {}".format(slack_input))
+        logger.error("Processing error: %s", slack_input)
         return SlackEvent.Error(
             error=slack_input.get('error'),
             code=slack_input.get('code'),
@@ -221,7 +220,7 @@ class Bot:
         channel to output the command result, and information about the user who made such
         request.
         """
-        logger.info("Processing message: {}".format(slack_input))
+        logger.info("Processing message: %s", slack_input)
         text = slack_input.get('text', '').strip().lower()
         handle_default = not config.MARKOV_ENABLED
 
@@ -232,20 +231,21 @@ class Bot:
                 logger.exception("failed to put message in the message queue")
 
         if text:
-            command= resolve(text, at=self.at_bot, handle_default=handle_default)
+            command = resolve(text, at=self.at_bot, handle_default=handle_default)
             if command:
                 return SlackEvent.Message(
                     command=command,
                     channel=slack_input.get('channel', self.default_channel),
                     user=slack_input.get('user')
                 )
-            elif self.at_bot.lower() in text and not handle_default:
+            if self.at_bot.lower() in text and not handle_default:
                 message = self.model.make_short_sentence(100, tries=50)
                 return SlackEvent.Message(
                     command=Command(action=static_response(message), args=[]),
                     channel=slack_input.get('channel', self.default_channel),
                     user=slack_input.get('user')
                 )
+        return None
 
     def _respond(self):
         """
@@ -262,7 +262,7 @@ class Bot:
                 else:
                     self.__respond_with_command(output)
             except Exception as ex:
-                logging.error("_respond exception: {}".format(ex))
+                logging.error("_respond exception: %s", ex)
 
     def _respond_to_debug_slack(self, output):
         """
@@ -284,7 +284,7 @@ class Bot:
             message=output,
             user=output.user,
         )
-        logging.info("Responding '{}'".format(response))
+        logging.info("Responding %s", response)
         self.client.api_call(
             "chat.postMessage",
             channel=output.channel,
@@ -295,7 +295,7 @@ class Bot:
     def __respond_with_event(self, event):
         response = event.action()
         if response:
-            logging.info(f'Responding {response}')
+            logging.info('Responding %s')
             self.client.api_call(
                 "chat.postMessage",
                 channel=event.channel,

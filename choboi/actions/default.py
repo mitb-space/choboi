@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import random
 from ..remote.giphy import get_random_gif_by_tag
 from ..resolver import default_command
 
