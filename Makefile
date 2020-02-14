@@ -10,7 +10,7 @@ lint:
 	pylint --rcfile=.pylintrc ./choboi
 
 test:
-	pytest
+	# pytest
 
 run:
 	$(PYTHON) choboi.py
