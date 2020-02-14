@@ -125,7 +125,6 @@ class Bot:
             self.storage.save_messages(message_objs)
             logger.info(f"saving {ii} new messages")
 
-            self._respond_to_debug_slack(f"trained and saved {ii} new messges")
         except Exception:
             logger.exception('something failed while training choboi')
 
