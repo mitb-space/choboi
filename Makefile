@@ -4,7 +4,13 @@ PID=choboi.pid
 
 bootstrap:
 	python3 -m venv ./venv
-	./venv/bin/pip install -r requirements.txt
+	./venv/bin/pip install -r requirements/test.txt
+
+lint:
+	pylint --rcfile=.pylintrc ./choboi
+
+test:
+	# pytest
 
 run:
 	$(PYTHON) choboi.py

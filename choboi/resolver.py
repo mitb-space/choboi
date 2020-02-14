@@ -25,7 +25,7 @@ def text_response(pattern, output, mention=False):
 
 
 def register_command(pattern, mention=False):
-    logger.info("registering: {}".format(pattern))
+    logger.info("registering: %s", pattern)
     def wrapper(func):
         if mention:
             mention_commands[re.compile(pattern)] = func
@@ -40,7 +40,7 @@ def default_command():
     if _default_command is not None:
         logger.error("over writing current default command")
     def wrapper(func):
-        global _default_command
+        global _default_command # pylint: disable=global-statement
         _default_command = func
         return func
     return wrapper
@@ -53,7 +53,7 @@ def resolve(text, at=None, handle_default=True):
     """
     # Empty string, just return
     if not text:
-        return
+        return None
 
     at = at.lower()
     at_in_text = False
@@ -77,8 +77,7 @@ def resolve(text, at=None, handle_default=True):
         if handle_default:
             logger.info(_default_command)
             return Command(action=_default_command, args=[])
-        else:
-            return
+        return None
 
     return output
 
@@ -89,3 +88,4 @@ def _search(text, commands):
         if match:
             args = match.groups() or []
             return Command(action=action, args=args)
+        return None

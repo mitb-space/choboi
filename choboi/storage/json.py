@@ -39,4 +39,3 @@ class JSONStorage:
     def save_messages(self, messages):
         self._data += messages
         self.save(self._data)
-

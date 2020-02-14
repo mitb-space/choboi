@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import requests
-from collections import namedtuple
+
 from ..event import register_event
 
 @register_event(name='haiku', at='7:00', channel='#shit-posts')
@@ -16,11 +16,12 @@ def new_chapter():
             link = data['url']
     if highest:
         return f'dank {link}'
+    return None
 
 
 def get_posts():
     r = requests.get(
         'https://www.reddit.com/r/youtubehaiku/.json',
-        headers = {'User-agent': 'choboi'}
+        headers={'User-agent': 'choboi'}
     ).json()
     return r['data']['children']

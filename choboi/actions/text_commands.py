@@ -20,7 +20,7 @@ homies_assemble = text_response(
 )
 
 up_arrow = text_response(
-    '\^',
+    r'\^',
     '^'
 )
 
@@ -48,7 +48,7 @@ oh_shit_waddup = text_response(
 
 trebuchet = text_response(
     '.*trebuchet.*',
-"""
+    """
 With a trebuchet, you can lob a 90kg object about 300m away.
 That's 198.416 pounds 984.252 feet. WOW!
 """
@@ -75,11 +75,11 @@ numbies = text_response(
 )
 
 math_checks_out = text_response(
-    ".+\%",
+    r".+\%",
     "math checks out"
 )
 
 be_nice = text_response(
-    "\(╯°□°）╯︵ ┻━┻",
+    r"\(╯°□°）╯︵ ┻━┻",
     "┬─┬ ノ( ゜-゜ノ)"
 )
