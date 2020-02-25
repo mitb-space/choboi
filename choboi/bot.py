@@ -94,7 +94,8 @@ class Bot:
         self.storage = storage.JSONStorage('data.json')
         message_objs = self.storage.get_messages()
         messages = get_message_text(message_objs)
-        self.model = markovify.Text(". ".join(messages), state_size=4)
+        if messages:
+            self.model = markovify.Text(". ".join(messages), state_size=4)
 
     def _train(self):
         """
