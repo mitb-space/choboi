@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from choboi import config
-from choboi.bot import Bot
+from choboi.bot.bot import Bot
 
 
 def main():
     bot = Bot()
-    bot.connect()
+    bot.run()
 
 if __name__ == '__main__':
     main()

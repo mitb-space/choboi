@@ -84,8 +84,8 @@ def resolve(text, at=None, handle_default=True):
 
 def _search(text, commands):
     for pattern, action in commands.items():
-        match = pattern.match(text)
+        match = pattern.match(text.lower())
         if match:
             args = match.groups() or []
             return Command(action=action, args=args)
-        return None
+    return None

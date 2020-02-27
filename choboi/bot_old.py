@@ -25,6 +25,7 @@ class SlackEvent:
     Error = namedtuple('Error', ['error', 'code', 'msg'])
 
 
+
 class Bot:
     default_channel = config.DEFAULT_CHANNEL
     num_writers = 2
@@ -280,6 +281,7 @@ class Bot:
         """
         Apply command action and reply with a message
         """
+        # TODO: use a context object
         response = output.command.action(
             *output.command.args,
             message=output,
