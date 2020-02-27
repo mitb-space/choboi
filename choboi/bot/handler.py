@@ -25,16 +25,19 @@ class Handler:
 
     def run(self):
         while self.alive:
-            time.sleep(self.delay)
-            if self.input_queue.empty():
-                continue
-            input_event = self.input_queue.get()
-            if not input_event:
-                continue
-            output_event = self.__resolve(input_event)
-            if output_event:
-                logger.info("resolved message: %s", output_event)
-                self.output_queue.put_nowait(output_event)
+            try:
+                time.sleep(self.delay)
+                if self.input_queue.empty():
+                    continue
+                input_event = self.input_queue.get()
+                if not input_event:
+                    continue
+                output_event = self.__resolve(input_event)
+                if output_event:
+                    logger.info("resolved message: %s", output_event)
+                    self.output_queue.put_nowait(output_event)
+            except Exception as ex:
+                logger.error("error: %s", ex)
 
     def __resolve(self, input_event):
         """

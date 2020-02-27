@@ -22,14 +22,17 @@ class SlackResponder:
         output message to slack
         """
         while self.alive:
-            time.sleep(self.delay)
-            if self.queue.empty():
-                continue
-            output_event = self.queue.get()
-            if not output_event:
-                continue
-            self.__respond(output_event)
-            logger.info("responded to slack")
+            try:
+                time.sleep(self.delay)
+                if self.queue.empty():
+                    continue
+                output_event = self.queue.get()
+                if not output_event:
+                    continue
+                self.__respond(output_event)
+                logger.info("responded to slack")
+            except Exception as ex:
+                logger.error("error: %s", ex)
 
     def __respond(self, output_event):
         self.slack_client.api_call(
