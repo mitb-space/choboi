@@ -9,15 +9,15 @@ services:
     environment:
       SLACK_CHOBOI_API_TOKEN: ${SLACK_CHOBOI_API_TOKEN}
     depends_on:
-      - db
+      - choboi-db
 
   migrate:
     build: .
     command: alembic upgrade head
     depends_on:
-      - db
+      - choboi-db
 
-  db:
+  choboi-db:
     image: postgres:12.0-alpine
     environment:
       POSTGRES_USER: choboi
