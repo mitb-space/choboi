@@ -58,7 +58,25 @@ def vote_down(*args, **kwargs):
 
 @register_command('^print bluecoin', mention=False)
 def print_votes(*args, **kwargs):
-    return "sorry dawg, we need to rewrite this"
+    conn = kwargs.get('conn')
+
+    output = 'rich homies:\n'
+    result = Vote.aggreate_votes(conn)
+    for rec_id, votes in result:
+        name = display_name(rec_id)
+        output += '{}: {}\n'.format(name, votes)
+    return output
+
+
+def display_name(uid):
+    if uid not in users:
+        u = get_user(uid)
+        if u:
+            users[uid] = u
+    u = users.get(uid)
+    if u:
+        return u.get('profile', {}).get('display_name')
+    return 'anonymous homie'
 
 
 @register_command("who'?s being generous", mention=False)

@@ -1,5 +1,6 @@
 from sqlalchemy import Column, DateTime, String, Integer, func
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql import text
 
 Base = declarative_base()
 
@@ -25,3 +26,15 @@ class Vote(Base):
             giver_id=giver_id,
             recipient_id=recipient_id,
             amount=-1)
+
+    @classmethod
+    def aggreate_votes(cls, conn):
+        """
+        returns a list of (recipient_id, vote_count)
+        """
+        stmt = text(
+            'SELECT recipient_id, SUM(amount) AS amount '
+            'FROM votes '
+            'GROUP BY recipient_id'
+        )
+        return conn.execute(stmt)
