@@ -9,6 +9,7 @@ from . import config
 from .listener import SlackListener
 from .responder import SlackResponder
 from .handler import Handler
+from .recorder.recorder import RecorderMiddleare
 
 logger = logging.getLogger(__name__)
 
@@ -51,12 +52,18 @@ class Bot:
             engine = sqlalchemy.create_engine(config.DATABASE_URL)
             self.db = engine.connect()
 
+    def __register_middlewares(self):
+        self.middlewares = [
+            RecorderMiddleare(self.db),
+        ]
+
     def run(self):
         # configure
         self.__connect_slack()
         self.__connect_db()
+        self.__register_middlewares()
         for _ in range(self.num_handlers):
-            h = Handler(self.input_queue, self.output_queue, self.bot_id, self.delay, self.db)
+            h = Handler(self.input_queue, self.output_queue, self.bot_id, self.delay, self.db, self.middlewares)
             self.threads.append(threading.Thread(target=h.run))
 
         # go

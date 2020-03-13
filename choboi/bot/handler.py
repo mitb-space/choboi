@@ -15,29 +15,32 @@ class Handler:
     there are any outputs, it appends the OutputEvent onto the output queue.
     """
 
-    def __init__(self, input_queue, output_queue, bot_id, delay, db):
+    def __init__(self, input_queue, output_queue, bot_id, delay, db, middlewares):
         self.input_queue = input_queue
         self.output_queue = output_queue
         self.bot_id = bot_id
         self.delay = delay
         self.alive = True
         self.db = db
+        self.middlewares = middlewares
 
     def run(self):
         while self.alive:
             try:
                 time.sleep(self.delay)
-                if self.input_queue.empty():
-                    continue
                 input_event = self.input_queue.get()
-                if not input_event:
-                    continue
-                output_event = self.__resolve(input_event)
-                if output_event:
-                    logger.info("resolved message: %s", output_event)
-                    self.output_queue.put_nowait(output_event)
+                if input_event:
+                    for middleware in self.middlewares:
+                        middleware.process_input(input_event)
+                    output_event = self.__resolve(input_event)
+                    self.__respond(output_event)
             except Exception as ex:
                 logger.error("error: %s", ex)
+
+    def __respond(self, output_event):
+        if output_event:
+            logger.info("resolved message: %s", output_event)
+            self.output_queue.put_nowait(output_event)
 
     def __resolve(self, input_event):
         """
@@ -47,6 +50,11 @@ class Handler:
         cmd = resolve(input_event.message, at=self.bot_id, handle_default=True)
         logger.info("action: %s", cmd)
         if not cmd:
+            if input_event.default_output_message:
+                return OutputEvent(
+                    channel=input_event.channel,
+                    message=message,
+                )
             return None
 
         message = cmd.action(
