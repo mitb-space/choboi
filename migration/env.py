@@ -17,9 +17,10 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from choboi.votes.models import Vote
-from choboi.bot.recorder.models import Message
-target_metadata = [Vote.Base.MetaData, Message.Base.MetaData]
+# from choboi.votes.models import Vote
+# from choboi.bot.recorder.models import Message
+# target_metadata = [Vote.Base.MetaData, Message.Base.MetaData]
+target_metadata = None
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

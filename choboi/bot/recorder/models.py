@@ -8,6 +8,7 @@ Base = declarative_base()
 class Message(Base):
     __tablename__ = 'messages'
 
+    id = Column(Integer, primary_key=True)
     user_id = Column(String)
     channel_id = Column(String)
     message = Column(Text)

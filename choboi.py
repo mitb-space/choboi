@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from choboi import config
 from choboi.bot.bot import Bot
 
 
