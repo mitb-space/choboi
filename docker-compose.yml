@@ -8,12 +8,16 @@ services:
     build: .
     environment:
       SLACK_CHOBOI_API_TOKEN: ${SLACK_CHOBOI_API_TOKEN}
+    volumes:
+      - ./:/usr/src/app:z
     depends_on:
       - choboi-db
 
   migrate:
     build: .
     command: alembic upgrade head
+    volumes:
+      - ./:/usr/src/app:z
     depends_on:
       - choboi-db
 

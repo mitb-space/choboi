@@ -17,7 +17,7 @@ THREAD_DELAY = 0.1
 
 DATABASE_URL = os.environ.get(
     'SLACK_CHOBOI_DATABASE_URL',
-    'postgresql://choboi:choboi@localhost:55432/choboi',
+    'postgresql://choboi:choboi@choboi-db/choboi',
 )
 
 

@@ -9,7 +9,6 @@ import markovify
 import schedule
 from slackclient import SlackClient
 
-from . import config
 from . import storage
 from .messages import get_message_text
 from .event import events

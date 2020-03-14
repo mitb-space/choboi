@@ -38,7 +38,6 @@ class SlackListener:
             except Exception as ex:
                 logger.error("listener exception: %s", ex)
 
-
     def __process_input(self, slack_inputs):
         events = []
         for slack_input in slack_inputs:
