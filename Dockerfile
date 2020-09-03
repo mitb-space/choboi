@@ -9,5 +9,5 @@ RUN pip install --no-cache-dir -r requirements/base.txt
 
 COPY . .
 
-CMD [ "python", "./choboi.py" ]
+CMD [ "python", "./app.py" ]
 

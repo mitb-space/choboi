@@ -26,10 +26,10 @@ test:
 release: bootstrap migrate
 
 run:
-	$(PYTHON) choboi.py
+	$(PYTHON) app.py
 
 start:
-	$(PYTHON) choboi.py > /dev/null 2>&1 & echo $$! > $(PID)
+	$(PYTHON) app.py > /dev/null 2>&1 & echo $$! > $(PID)
 
 kill:
 	kill $$(cat $(PID))
