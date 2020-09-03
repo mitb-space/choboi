@@ -4,7 +4,7 @@ ALEMBIC=./venv/bin/alembic
 PID=choboi.pid
 APP_NAME=choboi
 DOCKER_REPO=davidharrigan
-DATABASE_URL=choboi:choboi@localhost:55432/choboi?sslmode=disable
+LOCAL_DATABASE_URL=postgres://choboi:choboi@localhost:55432/choboi?sslmode=disable
 
 .PHONY: help
 help:
@@ -15,15 +15,16 @@ bootstrap:
 	./venv/bin/pip install -r requirements.txt
 
 migrate:
-	DATABASE_URL=$(DATABASE_URL) $(ALEMBIC) upgrade head
+	DATABASE_URL=$(LOCAL_DATABASE_URL) $(ALEMBIC) upgrade head
+
+release:
+	alembic upgrade head
 
 lint:
 	pylint --rcfile=.pylintrc ./choboi
 
 test:
 	# pytest
-
-release: bootstrap migrate
 
 run:
 	$(PYTHON) app.py

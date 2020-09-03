@@ -15,7 +15,7 @@ MARKOV_TRAIN_FREQUENCY = 600
 
 THREAD_DELAY = 0.1
 
-DATABASE_URL = 'postgres://' + os.environ.get('DATABASE_URL', '')
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
 
 LOGGING = {
     'version': 1,
