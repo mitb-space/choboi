@@ -58,7 +58,6 @@ class Bot:
         ]
 
     def run(self):
-        # configure
         self.__connect_slack()
         self.__connect_db()
         self.__register_middlewares()
@@ -66,14 +65,12 @@ class Bot:
             h = Handler(self.input_queue, self.output_queue, self.bot_id, self.delay, self.db, self.middlewares)
             self.threads.append(threading.Thread(target=h.run))
 
-        # go
         for t in self.threads:
             try:
                 t.start()
             except Exception as ex:
                 logging.error("failed to start thread: %s", ex)
 
-        # wait
         for t in self.threads:
             try:
                 if t.is_alive():

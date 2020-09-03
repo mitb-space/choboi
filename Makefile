@@ -3,15 +3,18 @@ PYTHON=./venv/bin/python3
 PID=choboi.pid
 APP_NAME=choboi
 DOCKER_REPO=davidharrigan
+DATABASE_URL=choboi:choboi@localhost:55432/choboi?sslmode=disable
 
 .PHONY: help
 help:
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-
 bootstrap:
 	python3 -m venv ./venv
 	./venv/bin/pip install -r requirements/test.txt
+
+migrate:
+	DATABASE_URL=$(DATABASE_URL) alembic upgrade head
 
 lint:
 	pylint --rcfile=.pylintrc ./choboi
