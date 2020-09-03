@@ -1,6 +1,5 @@
 # export all actions
 
-from .beer import *
 from .idea import *
 from .misc import *
 from .text_commands import *
