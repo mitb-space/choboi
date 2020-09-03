@@ -1,5 +1,6 @@
 VERSION=$(shell git describe --tags 2> /dev/null || echo '0.0.0')
 PYTHON=./venv/bin/python3
+ALEMBIC=./venv/bin/alembic
 PID=choboi.pid
 APP_NAME=choboi
 DOCKER_REPO=davidharrigan
@@ -14,13 +15,15 @@ bootstrap:
 	./venv/bin/pip install -r requirements/test.txt
 
 migrate:
-	DATABASE_URL=$(DATABASE_URL) alembic upgrade head
+	DATABASE_URL=$(DATABASE_URL) $(ALEMBIC) upgrade head
 
 lint:
 	pylint --rcfile=.pylintrc ./choboi
 
 test:
 	# pytest
+
+release: bootstrap migrate
 
 run:
 	$(PYTHON) choboi.py
