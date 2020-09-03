@@ -1,2 +1,2 @@
 release: make release
-web: make start
+web: python app.py
