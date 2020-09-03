@@ -12,7 +12,7 @@ help:
 
 bootstrap:
 	python3 -m venv ./venv
-	./venv/bin/pip install -r requirements/test.txt
+	./venv/bin/pip install -r requirements.txt
 
 migrate:
 	DATABASE_URL=$(DATABASE_URL) $(ALEMBIC) upgrade head
