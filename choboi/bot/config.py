@@ -15,11 +15,7 @@ MARKOV_TRAIN_FREQUENCY = 600
 
 THREAD_DELAY = 0.1
 
-DATABASE_URL = os.environ.get(
-    'SLACK_CHOBOI_DATABASE_URL',
-    'postgresql://choboi:choboi@choboi-db/choboi',
-)
-
+DATABASE_URL = 'postgres://' + os.environ.get('DATABASE_URL', '')
 
 LOGGING = {
     'version': 1,
