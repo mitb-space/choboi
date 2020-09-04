@@ -11,7 +11,6 @@ from alembic import context
 config = context.config
 
 section = config.config_ini_section
-print(os.environ.get("DATABASE_URL"))
 config.set_section_option(section, "DATABASE_URL", os.environ.get("DATABASE_URL"))
 
 # Interpret the config file for Python logging.
