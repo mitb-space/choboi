@@ -47,8 +47,7 @@ class Bot:
 
     def __connect_db(self):
         if config.DATABASE_URL:
-            engine = sqlalchemy.create_engine(config.DATABASE_URL)
-            self.db = engine.connect()
+            self.db = sqlalchemy.create_engine(config.DATABASE_URL)
 
     def __register_middlewares(self):
         self.middlewares = [

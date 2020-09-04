@@ -1,6 +1,6 @@
 import functools
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import sessionmaker
 
 
 def begin_tx(func):
@@ -11,10 +11,12 @@ def begin_tx(func):
         tx = None
         conn = kwargs.get('conn')
         if conn:
-            tx = Session(bind=conn)
+            tx = sessionmaker(bind=conn)()
         try:
             kwargs['tx'] = tx
-            return func(*args, **kwargs)
+            res = func(*args, **kwargs)
+            tx.commit()
+            return res
         except Exception:
             if tx:
                 tx.rollback()
