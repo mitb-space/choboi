@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import sessionmaker
 
 from .models import Message
 
@@ -14,6 +14,6 @@ class RecorderMiddleare:
             channel_id=input_event.channel,
             message=input_event.message,
         )
-        session = Session(bind=self.conn)
+        session = sessionmaker(bind=self.conn)()
         session.add(m)
         session.commit()
