@@ -5,11 +5,12 @@ import queue
 import sqlalchemy
 from slackclient import SlackClient
 
-from . import config
-from .listener import SlackListener
-from .responder import SlackResponder
-from .handler import Handler
-from .recorder.recorder import RecorderMiddleare
+from choboi.bot import config
+from choboi.bot.listener import SlackListener
+from choboi.bot.responder import SlackResponder
+from choboi.bot.handler import Handler
+from choboi.bot.recorder.recorder import RecorderMiddleare
+from choboi.bot.scheduler import Scheduler
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,8 @@ class Bot:
         self.bot_id = config.BOT_ID
 
         self.middlewares = []
+
+        self.client = None
 
         # database
         self.db = None
@@ -40,11 +43,7 @@ class Bot:
             raise Exception("Unable to connect to slack RTM service")
         logger.info("connected to slack")
 
-        listener = SlackListener(self.input_queue, self.delay, client, self.bot_id)
-        self.threads.append(threading.Thread(target=listener.run))
-
-        responder = SlackResponder(self.output_queue, self.delay, client, self.bot_id)
-        self.threads.append(threading.Thread(target=responder.run))
+        self.client = client
 
     def __connect_db(self):
         if config.DATABASE_URL:
@@ -57,12 +56,21 @@ class Bot:
         ]
 
     def run(self):
-        self.__connect_slack()
         self.__connect_db()
+        self.__connect_slack()
         self.__register_middlewares()
-        for _ in range(self.num_handlers):
-            h = Handler(self.input_queue, self.output_queue, self.bot_id, self.delay, self.db, self.middlewares)
-            self.threads.append(threading.Thread(target=h.run))
+
+        listener = SlackListener(self.input_queue, self.delay, self.client, self.bot_id)
+        self.threads.append(threading.Thread(target=listener.run))
+
+        responder = SlackResponder(self.output_queue, self.delay, self.client, self.bot_id)
+        self.threads.append(threading.Thread(target=responder.run))
+
+        scheduler = Scheduler(self.output_queue, self.delay, self.client, self.db)
+        self.threads.append(threading.Thread(target=scheduler.run))
+
+        handler = Handler(self.input_queue, self.output_queue, self.bot_id, self.delay, self.db, self.middlewares)
+        self.threads.append(threading.Thread(target=handler.run))
 
         for t in self.threads:
             try:
