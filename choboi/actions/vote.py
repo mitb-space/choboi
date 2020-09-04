@@ -7,9 +7,10 @@ import logging
 import requests
 from sqlalchemy.orm import Session
 
-from ..resolver import register_command
-from ..bot.config import SLACK_TOKEN
-from ..votes.models import Vote
+from choboi.resolver import register_command
+from choboi.bot.config import SLACK_TOKEN
+from choboi.votes.models import Vote
+from choboi.db.transaction import begin_tx
 
 logger = logging.getLogger(__name__)
 
@@ -22,46 +23,43 @@ users = {}
 
 
 @register_command(r'\<\@(?P<uid>.+)\>\s*\+\+')
+@begin_tx
 def vote_up(*args, **kwargs):
     to = args[0].lower()
     actor = kwargs.get('user', '').lower()
-    conn = kwargs.get('conn')
 
-    session = Session(bind=conn)
+    tx = kwargs.get('tx')
 
     if to == actor or actor in banned:
         vote = Vote.down(actor, to)
-        session.add(vote)
-        session.commit()
+        tx.add(vote)
         return "you can't game the system bro"
 
     vote = Vote.up(actor, to)
-    session.add(vote)
-    session.commit()
+    tx.add(vote)
     return "one bluecoin for my homie"
 
 
 @register_command(r'\<\@(?P<uid>.+)\>\s*\-\-')
+@begin_tx
 def vote_down(*args, **kwargs):
     to = args[0].lower()
     actor = kwargs.get('user', '').lower()
-    conn = kwargs.get('conn')
-
-    session = Session(bind=conn)
+    tx = kwargs.get('tx')
 
     vote = Vote.down(actor, to)
-    session.add(vote)
-    session.commit()
+    tx.add(vote)
 
     return "oof lost a bluecoin yo"
 
 
 @register_command('^print bluecoin', mention=False)
+@begin_tx
 def print_votes(*args, **kwargs):
-    conn = kwargs.get('conn')
+    tx = kwargs.get('tx')
 
     output = 'rich homies:\n'
-    result = Vote.aggreate_votes(conn)
+    result = Vote.aggreate_votes(tx)
     for rec_id, votes in result:
         name = display_name(rec_id)
         output += '{}: {}\n'.format(name, votes)
