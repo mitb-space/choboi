@@ -1,21 +1,39 @@
 # -*- coding: utf-8 -*-
-from collections import namedtuple
-
 import requests
+from sqlalchemy import Column, DateTime, String, Integer, func
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import text
 
-from ..event import register_event
+from choboi.bot.scheduler import schedule
 
-Chapter = namedtuple('Chapter', ['chapter', 'link'])
+Base = declarative_base()
 
-chapters = []
 
-@register_event(name='one-piece-chapter', frequency=600, channel='#anime')
-def new_chapter():
+class Chapter(Base):
+    __tablename__ = 'one_piece_chapters'
+    chapter = Column(Integer, primary_key=True)
+    link = Column(String)
+
+    @classmethod
+    def get_latest_chapter(cls, conn):
+        stmt = text(
+            'SELECT chapter, link '
+            'FROM one_piece_chapters '
+            'ORDER BY chapter DESC LIMIT 1 '
+        )
+        stmt.columns(cls.chapter, cls.link)
+        result = conn.execute(stmt).fetchone()
+        if result is not None:
+            return result[0]
+        return None
+
+
+@schedule(name='one-piece-chapter', frequency=600, channel='#anime')
+def new_chapter(conn):
+    session = Session(bind=conn)
+    last_chapter = Chapter.get_latest_chapter(session)
     posts = get_posts()
-    if not chapters:
-        last_chapter = 0
-    else:
-        last_chapter = chapters[-1].chapter
     for p in posts:
         data = p['data']
         if data['link_flair_text'] == 'Current Chapter':
@@ -26,8 +44,13 @@ def new_chapter():
                 if last_chapter != chapter:
                     last_chapter = chapter
                     link = data['url']
-                    chapters.append(Chapter(last_chapter, link))
-                    return f'<!channel> dank chapter {last_chapter} is up: {link}'
+                    session.add(
+                        Chapter(
+                            chapter=chapter,
+                            link=link,
+                        ))
+                    session.commit()
+                    return f':wave: New One Piece #{last_chapter} is up: {link}'
     return None
 
 
