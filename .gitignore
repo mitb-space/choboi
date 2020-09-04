@@ -95,3 +95,4 @@ logs/*
 
 choboi.pid
 *.json
+!app.json
