@@ -5,7 +5,6 @@ handles user++ uesr-- scores
 import logging
 
 import requests
-from sqlalchemy.orm import Session
 
 from choboi.resolver import register_command
 from choboi.bot.config import SLACK_TOKEN

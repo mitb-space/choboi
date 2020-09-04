@@ -2,7 +2,6 @@
 import requests
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 from choboi.bot.scheduler import schedule
