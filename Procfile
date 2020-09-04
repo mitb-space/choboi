@@ -1,2 +1,2 @@
 release: make release
-web: python app.py
+worker: python app.py

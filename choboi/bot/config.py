@@ -15,7 +15,7 @@ MARKOV_TRAIN_FREQUENCY = 600
 
 THREAD_DELAY = 0.1
 
-DATABASE_URL = os.environ.get('DATABASE_URL', '')
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgres://choboi:choboi@localhost:55432/choboi?sslmode=disable')
 
 LOGGING = {
     'version': 1,

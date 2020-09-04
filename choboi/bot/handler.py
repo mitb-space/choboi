@@ -48,12 +48,12 @@ class Handler:
         """
         logger.info(input_event)
         cmd = resolve(input_event.message, at=self.bot_id, handle_default=True)
-        logger.info("action: %s", cmd)
+        logger.info("resolved action: %s", cmd)
         if not cmd:
             if input_event.default_output_message:
                 return OutputEvent(
                     channel=input_event.channel,
-                    message=message,
+                    message='',
                 )
             return None
 

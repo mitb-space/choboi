@@ -15,12 +15,12 @@ logger = logging.getLogger(__name__)
 
 
 class Bot:
-    num_slack_listeners = 1
-    num_slack_responders = 1
     num_handlers = 1
 
     def __init__(self):
         self.bot_id = config.BOT_ID
+
+        self.middlewares = []
 
         # database
         self.db = None
@@ -40,12 +40,11 @@ class Bot:
             raise Exception("Unable to connect to slack RTM service")
         logger.info("connected to slack")
 
-        for _ in range(self.num_slack_listeners):
-            l = SlackListener(self.input_queue, self.delay, client, self.bot_id)
-            self.threads.append(threading.Thread(target=l.run))
-        for _ in range(self.num_slack_responders):
-            r = SlackResponder(self.output_queue, self.delay, client, self.bot_id)
-            self.threads.append(threading.Thread(target=r.run))
+        listener = SlackListener(self.input_queue, self.delay, client, self.bot_id)
+        self.threads.append(threading.Thread(target=listener.run))
+
+        responder = SlackResponder(self.output_queue, self.delay, client, self.bot_id)
+        self.threads.append(threading.Thread(target=responder.run))
 
     def __connect_db(self):
         if config.DATABASE_URL:
