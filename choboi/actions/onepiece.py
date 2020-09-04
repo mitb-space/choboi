@@ -2,10 +2,10 @@
 import requests
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 from choboi.bot.scheduler import schedule
+from choboi.db.transaction import begin_tx
 
 Base = declarative_base()
 
@@ -30,9 +30,10 @@ class Chapter(Base):
 
 
 @schedule(name='one-piece-chapter', frequency=600, channel='#anime')
-def new_chapter(conn):
-    session = Session(bind=conn)
-    last_chapter = Chapter.get_latest_chapter(session)
+@begin_tx
+def new_chapter(*args, **kwargs):
+    tx = kwargs.get('tx')
+    last_chapter = Chapter.get_latest_chapter(tx)
     posts = get_posts()
     for p in posts:
         data = p['data']
@@ -44,12 +45,11 @@ def new_chapter(conn):
                 if last_chapter != chapter:
                     last_chapter = chapter
                     link = data['url']
-                    session.add(
+                    tx.add(
                         Chapter(
                             chapter=chapter,
                             link=link,
                         ))
-                    session.commit()
                     return f':wave: New One Piece #{last_chapter} is up: {link}'
     return None
 

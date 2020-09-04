@@ -2,7 +2,15 @@
 """
 This file contains raw text -> text interactions
 """
-from ..resolver import text_response
+import random
+
+from choboi.resolver import text_response
+from choboi.resolver import register_command
+
+
+@register_command('^soo*$')
+def sososo(*args, **kwargs):
+    return "so" * random.randint(3, 16)
 
 herro = text_response(
     '.*her+o.*',
