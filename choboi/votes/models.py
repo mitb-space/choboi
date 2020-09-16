@@ -28,7 +28,7 @@ class Vote(Base):
             amount=-1)
 
     @classmethod
-    def aggreate_votes(cls, conn):
+    def aggregate_votes(cls, conn):
         """
         returns a list of (recipient_id, vote_count)
         """

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-handles user++ uesr-- scores
+handles user++ user-- scores
 """
 import logging
 
@@ -58,7 +58,7 @@ def print_votes(*args, **kwargs):
     tx = kwargs.get('tx')
 
     output = 'rich homies:\n'
-    result = Vote.aggreate_votes(tx)
+    result = Vote.aggregate_votes(tx)
     for rec_id, votes in result:
         name = display_name(rec_id)
         output += '{}: {}\n'.format(name, votes)

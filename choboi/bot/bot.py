@@ -30,8 +30,8 @@ class Bot:
 
         # thread settings
         self.delay = config.THREAD_DELAY
-        self.input_queue = queue.LifoQueue()
-        self.output_queue = queue.LifoQueue()
+        self.input_queue = queue.Queue()
+        self.output_queue = queue.Queue()
         self.threads = []
 
     def __connect_slack(self):
