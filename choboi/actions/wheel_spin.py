@@ -24,6 +24,7 @@ def wheel_spin(*args, **kwargs):
 
     # testing
     allow = ['u3942s8pn']
+    logger.info(result)
     result = filter(lambda x: x[0] in allow, result)
 
     winner = random.choice(result)
