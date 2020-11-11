@@ -13,7 +13,7 @@ img_url = 'https://imgur.com/frdKT6E'
 logger = logging.getLogger(__name__)
 
 
-@add_schedule(name='wheel-spin', schedule=schedule.every().day.at('09:00'), channel='#dev-bot')
+@add_schedule(name='wheel-spin', schedule=schedule.every().day.at('09:00'), channel='#shit-posts')
 @begin_tx
 def wheel_spin(*args, **kwargs):
     tx = kwargs.get('tx')
@@ -21,4 +21,4 @@ def wheel_spin(*args, **kwargs):
     # anyone with bluecoin is eligible
     result = Vote.aggregate_votes(tx).fetchall()
     winner = random.choice(result)
-    return f'<@{winner[0].upper()}> {img_url}'
+    return f'<@{winner[0].upper()}> /roll 1d6 (yellow = 1, clockwise) {img_url}'
