@@ -2,20 +2,18 @@
 import logging
 import time
 from collections import namedtuple
-
 import schedule as schd
 
 logger = logging.getLogger(__name__)
 
 events = []
 
-Event = namedtuple('Event', ['name', 'at', 'frequency', 'channel', 'action'])
+Event = namedtuple('Event', ['name', 'schedule', 'channel', 'action'])
 
-
-def schedule(name, frequency=60, at=None, channel=None):
+def add_schedule(name, schedule, channel):
     logger.info('registering event: %s', name)
     def wrapper(func):
-        events.append(Event(name, at, frequency, channel, func))
+        events.append(Event(name, schedule, channel, func))
         return func
     return wrapper
 
@@ -30,14 +28,8 @@ class Scheduler:
 
     def run(self):
         for e in events:
-            if e.at:
-                schd.every().day.at(e.at).do(
-                    self.__run_scheduled_event(e)
-                )
-            else:
-                schd.every(e.frequency).seconds.do(
-                    self.__run_scheduled_event(e)
-                )
+            e.schedule.do(self.__run_scheduled_event(e))
+
         while self.alive:
             time.sleep(self.delay)
             schd.run_pending()
