@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import random
 
 import schedule
@@ -9,10 +10,13 @@ from choboi.votes.models import Vote
 
 img_url = 'https://imgur.com/frdKT6E'
 
+logger = logging.getLogger(__name__)
+
 
 @add_schedule(name='wheel-spin', schedule=schedule.every().day.at('09:00'), channel='#dev-bot')
 @begin_tx
 def wheel_spin(*args, **kwargs):
+    logger.info('starting wheel spin')
     tx = kwargs.get('tx')
 
     # anyone with bluecoin is eligible
