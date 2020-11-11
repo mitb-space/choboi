@@ -9,7 +9,6 @@ from choboi.bot import config
 from choboi.bot.listener import SlackListener
 from choboi.bot.responder import SlackResponder
 from choboi.bot.handler import Handler
-from choboi.bot.recorder.recorder import RecorderMiddleare
 from choboi.bot.scheduler import Scheduler
 
 logger = logging.getLogger(__name__)
@@ -50,9 +49,7 @@ class Bot:
             self.db = sqlalchemy.create_engine(config.DATABASE_URL)
 
     def __register_middlewares(self):
-        self.middlewares = [
-            RecorderMiddleare(self.db),
-        ]
+        self.middlewares = []
 
     def run(self):
         self.__connect_db()
