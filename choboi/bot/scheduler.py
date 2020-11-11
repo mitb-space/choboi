@@ -13,7 +13,7 @@ Event = namedtuple('Event', ['name', 'schedule', 'channel', 'action'])
 def add_schedule(name, schedule, channel):
     logger.info('registering event: %s', name)
     def wrapper(func):
-        events.append(Event(name,  schedule, channel, func))
+        events.append(Event(name, schedule, channel, func))
         return func
     return wrapper
 
