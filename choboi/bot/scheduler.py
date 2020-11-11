@@ -29,8 +29,6 @@ class Scheduler:
     def run(self):
         for e in events:
             e.schedule.do(self.__run_scheduled_event(e))
-            # testing
-            self.__run_scheduled_event(e)()
 
         while self.alive:
             time.sleep(self.delay)

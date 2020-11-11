@@ -16,17 +16,9 @@ logger = logging.getLogger(__name__)
 @add_schedule(name='wheel-spin', schedule=schedule.every().day.at('09:00'), channel='#dev-bot')
 @begin_tx
 def wheel_spin(*args, **kwargs):
-    logger.info('starting wheel spin')
     tx = kwargs.get('tx')
 
     # anyone with bluecoin is eligible
-    result = Vote.aggregate_votes(tx)
-
-    # testing
-    allow = ['u3942s8pn']
-    logger.info(result[0])
-    logger.info(result[0][0])
-    result = filter(lambda x: x[0] in allow, result)
-
+    result = Vote.aggregate_votes(tx).fetchall()
     winner = random.choice(result)
-    return f'<@{winner}> {img_url}'
+    return f'<@{winner[0].upper()}> {img_url}'
